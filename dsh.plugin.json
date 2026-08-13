@@ -1,0 +1,13 @@
+{
+  "id": "dsh-model-config-sync",
+  "version": "0.1.0",
+  "main": "lib/index.js",
+  "description": "Copy a preset model's context window, max output and reasoning efforts onto any configured custom provider, from a dedicated settings page.",
+  "engines": {
+    "dsh": ">=0.0.1"
+  },
+  "contributes": {
+    "tools": [],
+    "skills": []
+  }
+}

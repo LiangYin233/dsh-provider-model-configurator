@@ -1,0 +1,6 @@
+# dsh-model-config-sync bundle patch: mount the host plugin under its package
+# name, resolved through the profile's node_modules (the healed mirror makes
+# every bundle dependency resolvable to bare rows).
+- insert:
+    - id: dsh-model-config-sync
+      name: dsh-model-config-sync
