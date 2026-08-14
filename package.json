@@ -1,7 +1,7 @@
 {
   "name": "dsh-provider-model-configurator",
   "description": "Provider Model Configurator for DeepSeek Harness: view, create, edit, copy and delete model entries (context window, max output, modalities, reasoning efforts) across your configured providers, with quick-fill from the pi-ai preset catalog.",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "license": "MIT",
   "type": "module",
   "main": "lib/index.js",
@@ -33,7 +33,15 @@
     "LICENSE"
   ],
   "scripts": {
-    "check": "node --check lib/contract.js && node --check lib/index.js && node --check lib/client.js"
+    "build": "node build.mjs",
+    "build:dynamic": "node build.mjs --dynamic",
+    "typecheck": "tsc --noEmit",
+    "check": "npm run typecheck && npm run build && node --check lib/contract.js && node --check lib/index.js"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.0",
+    "esbuild": "^0.25.0",
+    "typescript": "^5.6.0"
   },
   "engines": {
     "node": "^22.19 || >=24"

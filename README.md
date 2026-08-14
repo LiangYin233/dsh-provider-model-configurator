@@ -65,9 +65,31 @@ dsh plugin --profile web add ./dsh-provider-model-configurator-0.3.1.tgz
 ├── lib/
 │   ├── index.js        Host 半区:modelConfigurator Typert Remote 服务(6 个方法)
 │   ├── contract.js     线契约:Invocation descriptors + Host Typert manifest
-│   └── client.js       Client 半区(自包含 ModuleLoader bundle):设置页
+│   └── client.js       构建产物:Client 半区(ModuleLoader bundle,由 src/ 生成)
+├── src/
+│   ├── page.tsx        设置页 UI 单一源码(TSX/JSX,双语词典、构建与表单逻辑)
+│   ├── static.tsx      静态 bundle 入口(remote 适配、样式注入)
+│   ├── dynamic.ts      动态插件入口(host.call 适配、styles.insert)
+│   └── env.d.ts        运行环境符号声明(React / styles / host)
+├── build.mjs           esbuild 构建:lib/client.js 与动态插件 code.client 函数体
+├── tsconfig.json
 └── README.md
 ```
+
+## 开发与构建
+
+页面以 TSX 记录在 `src/page.tsx`(不写 `React.createElement`),构建生成两个客户端产物:
+
+```sh
+npm install
+npm run build           # → lib/client.js(+ sourcemap),静态 bundle 的 Client 半区
+npm run build:dynamic   # → dist/dynamic-client-body.js,动态插件的 code.client 函数体
+npm run typecheck       # tsc --noEmit
+```
+
+- `src/static.tsx` 通过 Typert Remote 与宿主通信,是安装包(bundle)使用的 Client;
+- `src/dynamic.ts` 通过 `host.call` 与宿主通信,与 `src/host.dyn.js` 组成动态插件版本(cordis_define 用);
+- 两个入口共享 `src/page.tsx`,页面与环境的差异只存在于薄适配层。
 
 ## 架构
 
