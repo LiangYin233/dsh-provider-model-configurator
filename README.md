@@ -21,20 +21,20 @@ DSH 默认 LLM 提供商链路基于 `@deepseek-ai/dsh-llm-pi-ai`,底层是 `@ea
 
 ```sh
 # 从 git 安装(推送到 GitHub 后即可用此地址)
-dsh plugin --profile web add https://github.com/LiangYin233/dsh-model-config-sync/archive/refs/heads/main.tar.gz
+dsh plugin --profile web add https://github.com/LiangYin233/dsh-provider-model-configurator/archive/refs/heads/main.tar.gz
 
 # 或从本地打包安装(开发时;git/registry 安装会把包物化为 profile 内的真实目录,
 # 而 pnpm 对 `add <目录>` 使用符号链接,宿主端 ESM 依赖解析会失效,请走 tarball)
 npm pack
-dsh plugin --profile web add ./dsh-model-config-sync-0.2.0.tgz
+dsh plugin --profile web add ./dsh-provider-model-configurator-0.3.0.tgz
 ```
 
 然后**重启** Web 服务器并刷新页面:
 
-- Host 插件挂载为 `dsh-model-config-sync`;Client bundle 由 `/plugins/dsh-model-config-sync/client.js` 提供;
+- Host 插件挂载为 `dsh-provider-model-configurator`;Client bundle 由 `/plugins/dsh-provider-model-configurator/client.js` 提供;
 - 打开 Web 设置 → 左侧导航「供应商模型配置器」(Models 页之后)。
 
-> 安装要求:pnpm(在 PATH 中)、DSH `0.1.0-rc.6` 或更高版本。卸载:`dsh plugin --profile web remove dsh-model-config-sync`。
+> 安装要求:pnpm(在 PATH 中)、DSH `0.1.0-rc.6` 或更高版本。卸载:`dsh plugin --profile web remove dsh-provider-model-configurator`。
 
 ## 功能
 
@@ -60,10 +60,10 @@ dsh plugin --profile web add ./dsh-model-config-sync-0.2.0.tgz
 
 ```
 ├── package.json        bundle 清单:dsh.bundle.patch / dsh.client / exports
-├── cordis.patch.yml    bundle patch:插入 dsh-model-config-sync 条目
+├── cordis.patch.yml    bundle patch:插入 dsh-provider-model-configurator 条目
 ├── dsh.plugin.json     插件元数据(id/main/engines)
 ├── lib/
-│   ├── index.js        Host 半区:modelConfigSync Typert Remote 服务(6 个方法)
+│   ├── index.js        Host 半区:modelConfigurator Typert Remote 服务(6 个方法)
 │   ├── contract.js     线契约:Invocation descriptors + Host Typert manifest
 │   └── client.js       Client 半区(自包含 ModuleLoader bundle):设置页
 └── README.md
@@ -76,11 +76,11 @@ dsh plugin --profile web add ./dsh-model-config-sync-0.2.0.tgz
 │ settings.section 注册 React 页面(zh/en 双语)   │
 │   ├─ ① 复制来源(可选)  ② 提供商 · 模型管理    │
 │   │     ③ 模型配置(新建 / 编辑)               │
-│   └─ remote.modelConfigSync.*  ←→  Typert RPC  │
+│   └─ remote.modelConfigurator.*  ←→  Typert RPC  │
 └─────────────────────────────────────────────────┘
                   │  Connection /api 网关
 ┌─ Host(主进程)───────────────────────────────────┐
-│ ModelConfigSyncRuntime (TypertRemoteService)    │
+│ ModelConfiguratorRuntime (TypertRemoteService)    │
 │   presetProviders   llm.listConfigurableProviders│
 │   presetModels      llm.listModels / discoverModels│
 │   presetModelInfo   llm.resolveModelInfo(+目录)  │
