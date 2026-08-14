@@ -20,6 +20,7 @@ const common = {
   target: ['es2020'],
   jsxFactory: 'React.createElement',
   jsxFragment: 'React.Fragment',
+  loader: { '.css': 'text' },
   logLevel: 'info',
 }
 

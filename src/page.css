@@ -1,0 +1,204 @@
+/* Provider Model Configurator — settings page styles.
+   Only --dsw-alias-* semantic tokens, so the page follows the system theme. */
+
+.mcfg-page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 680px;
+  padding: 4px 2px 24px;
+}
+
+.mcfg-title {
+  color: var(--dsw-alias-label-primary);
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 24px;
+  margin: 0;
+}
+
+.mcfg-intro {
+  color: var(--dsw-alias-label-secondary);
+  font-size: 13px;
+  line-height: 20px;
+  margin: 0;
+}
+
+.mcfg-card {
+  background: var(--dsw-alias-bg-layer-2);
+  border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: 12px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.mcfg-cardTitle {
+  color: var(--dsw-alias-label-primary);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  margin: 0;
+}
+
+.mcfg-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.mcfg-label {
+  color: var(--dsw-alias-label-secondary);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.mcfg-input {
+  box-sizing: border-box;
+  width: 100%;
+  height: 32px;
+  padding: 0 10px;
+  border-radius: 8px;
+  border: 1px solid var(--dsw-alias-border-l1);
+  background: var(--dsw-alias-bg-base);
+  color: var(--dsw-alias-label-primary);
+  font-family: inherit;
+  font-size: 13px;
+}
+
+.mcfg-input:focus {
+  outline: none;
+  border-color: var(--dsw-alias-brand-primary);
+}
+
+.mcfg-input:disabled {
+  opacity: 0.55;
+}
+
+.mcfg-selectInput {
+  appearance: auto;
+}
+
+.mcfg-shrink {
+  width: auto;
+  flex: none;
+}
+
+.mcfg-row {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  align-items: center;
+}
+
+.mcfg-hint {
+  color: var(--dsw-alias-label-secondary);
+  font-size: 12px;
+  line-height: 18px;
+  margin: 0;
+}
+
+.mcfg-note {
+  color: var(--dsw-alias-state-warn-primary);
+  font-size: 12px;
+  line-height: 18px;
+  margin: 0;
+}
+
+.mcfg-divider {
+  border-top: 1px solid var(--dsw-alias-border-l1);
+  padding-top: 12px;
+  margin-top: 4px;
+}
+
+.mcfg-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border-left: 2px solid var(--dsw-alias-border-l1);
+  padding-left: 10px;
+}
+
+.mcfg-infoLine {
+  color: var(--dsw-alias-label-secondary);
+  font-size: 12px;
+  line-height: 18px;
+  margin: 0;
+}
+
+.mcfg-btn {
+  box-sizing: border-box;
+  height: 32px;
+  padding: 0 14px;
+  border-radius: 8px;
+  border: 1px solid var(--dsw-alias-border-l1);
+  background: var(--dsw-alias-bg-base);
+  color: var(--dsw-alias-label-primary);
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.mcfg-btn:hover {
+  background: var(--dsw-alias-interactive-bg-hover, var(--dsw-alias-bg-layer-1));
+}
+
+.mcfg-btnPrimary {
+  box-sizing: border-box;
+  height: 32px;
+  padding: 0 16px;
+  border-radius: 8px;
+  border: none;
+  background: var(--dsw-alias-brand-primary);
+  color: #fff;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.mcfg-btnPrimary:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.mcfg-check {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  align-items: center;
+  color: var(--dsw-alias-label-primary);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.mcfg-statusOk {
+  color: var(--dsw-alias-state-success-primary);
+  font-size: 13px;
+  line-height: 20px;
+  margin: 0;
+}
+
+.mcfg-statusErr {
+  color: var(--dsw-alias-state-error-primary);
+  font-size: 13px;
+  line-height: 20px;
+  margin: 0;
+}
+
+.mcfg-code {
+  background: var(--dsw-alias-bg-base);
+  border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: 8px;
+  padding: 10px;
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 12px;
+  line-height: 18px;
+  white-space: pre-wrap;
+  word-break: break-all;
+  color: var(--dsw-alias-label-secondary);
+  max-height: 260px;
+  overflow: auto;
+  margin: 0;
+}
