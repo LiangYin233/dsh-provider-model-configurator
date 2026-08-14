@@ -1,17 +1,20 @@
 # dsh-provider-model-configurator
 
-一个 [DeepSeek Harness (DSH)](https://github.com/deepseek-ai/dsh) **插件 bundle**:在独立设置页「模型 Pro / Model Pro」中集中**查看、新建、编辑、复制与删除**已配置提供商下的模型条目——上下文窗口、最大输出、输入模态、推理档位与推理兼容开关,全部直接读写 `llm-pi-ai` 的 `providers.<route>.models`,无需等待内置目录更新。
+一个 [DeepSeek Harness (DSH)](https://github.com/deepseek-ai/dsh) **插件**:在独立设置页「模型 Pro / Model Pro」中集中**查看、新建、编辑、复制与删除**已配置提供商下的模型条目——上下文窗口、最大输出、输入模态、推理档位与推理兼容开关。还可以从内置的 `llm-pi-ai` 的 `providers.<route>.models` 读取其上下文参数，无需自行填写、手动查询。
 
 ## 安装
 
 ```sh
-# 从 GitHub 安装
-dsh plugin --profile web add https://github.com/LiangYin233/dsh-provider-model-configurator/archive/refs/heads/main.tar.gz
+# 从 GitHub 安装(推荐版本化 tag URL;不要用 refs/heads/main.tar.gz:
+# 内容会变而 URL 不变,pnpm 会复用旧缓存,导致卸载重装后仍是旧版本)
+dsh plugin --profile web add https://github.com/LiangYin233/dsh-provider-model-configurator/archive/refs/tags/v0.3.2.tar.gz
 
-# 或从本地打包安装(开发时;请走 tarball,不要 `add <目录>`,符号链接会破坏宿主端 ESM 解析)
+# 或从本地打包安装
 npm pack
 dsh plugin --profile web add ./dsh-provider-model-configurator-0.3.2.tgz
 ```
+
+升级:把命令里的 `v0.3.2` 换成新 tag 重新执行 `add`(URL 变化才会重新下载);曾用旧 URL 安装过时,先 `remove` 再 `add` 新 URL。
 
 安装后**重启 Web 服务器并刷新页面**,打开设置 → 左侧导航「模型 Pro」(Models 页之后)。
 
@@ -43,19 +46,6 @@ dsh plugin --profile web add ./dsh-provider-model-configurator-0.3.2.tgz
 ├── build.mjs           esbuild 构建(lib/ 与 dist/dynamic-client-body.js)
 └── tsconfig.json
 ```
-
-## 开发与构建
-
-页面以 TSX 写在 `src/client/page.tsx`,业务逻辑在 `src/client/model.ts`,词典在 `src/client/locales/`(zh.json / en.json,一语言一文件),Host 半区在 `src/host/`。构建两套产物:
-
-```sh
-npm install
-npm run build           # → lib/(安装包使用的静态 bundle + Host)
-npm run build:dynamic   # → dist/dynamic-client-body.js(动态插件 code.client 函数体)
-npm run typecheck       # tsc --noEmit
-```
-
-两个 Client 入口(`static.tsx` 走 Typert Remote、`dynamic.ts` 走 host.call)共享 `src/client/page.tsx`,页面与环境的差异只存在于薄适配层。
 
 ## License
 
