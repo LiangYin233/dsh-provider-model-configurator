@@ -40,7 +40,7 @@
     "build": "node build.mjs",
     "build:dynamic": "node build.mjs --dynamic",
     "typecheck": "tsc --noEmit",
-    "check": "npm run typecheck && npm run build:dynamic && npm run build && node scripts/check-dynamic.mjs && node --check src/host/contract.js && node --check src/host/index.js"
+    "check": "npm run typecheck && node scripts/check-sync.mjs && node --experimental-strip-types --test scripts/test-model.mjs && npm run build:dynamic && npm run build && node scripts/check-dynamic.mjs && node --check src/host/contract.js && node --check src/host/index.js"
   },
   "devDependencies": {
     "@types/react": "^18.3.0",

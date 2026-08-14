@@ -21,6 +21,9 @@ const common = {
   format: 'cjs',
   platform: 'browser',
   target: ['es2020'],
+  // Keep CJK characters readable in the bundle (default charset 'ascii'
+  // would escape every non-ASCII char to \uXXXX and bloat the file).
+  charset: 'utf8',
   jsxFactory: 'React.createElement',
   jsxFragment: 'React.Fragment',
   loader: { '.css': 'text' },
@@ -44,16 +47,18 @@ if (dynamic) {
   await rm('dist/_dynamic-client.cjs')
   console.log('dynamic client body → dist/dynamic-client-body.js')
 } else {
+  // No sourcemap: the map would have to be shipped alongside the bundle
+  // (lib/client.js ends with a sourceMappingURL comment) but the published
+  // package excludes it, leaving a dangling reference.
   await build({
     ...common,
     entryPoints: ['src/client/static.tsx'],
     outfile: 'lib/client.js',
     external: ['react'],
-    sourcemap: true,
     banner: { js: `window.__ModuleLoader__.load({ id: ${JSON.stringify(PACKAGE)}, factory: (require) => { var module = { exports: {} }; var exports = module.exports; var React = require('react');` },
     footer: { js: 'return module.exports; } });' },
   })
-  console.log('static client bundle → lib/client.js (+ client.js.map)')
+  console.log('static client bundle → lib/client.js')
 }
 
 // Refresh the shipped host half from its sources (plain ESM, copied verbatim).

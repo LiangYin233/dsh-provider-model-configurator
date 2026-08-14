@@ -44,14 +44,26 @@ export function ModelConfiguratorPage(props: PageProps) {
   const [status, setStatus] = React.useState<Status | null>(null)
   const [sourceOpen, setSourceOpen] = React.useState(false)
   const closeSourceRef = React.useRef<HTMLButtonElement>(null)
+  const modalRef = React.useRef<HTMLDivElement>(null)
 
-  // Modal keyboard support: Escape closes, focus moves to the close button.
+  // Modal keyboard support: Escape closes, Tab stays inside, focus moves to
+  // the close button on open and returns to the trigger on close.
   React.useEffect(() => {
     if (!sourceOpen) return
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setSourceOpen(false) }
+    const prev = document.activeElement as HTMLElement | null
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') { setSourceOpen(false); return }
+      if (e.key !== 'Tab' || !modalRef.current) return
+      const focusable = modalRef.current.querySelectorAll<HTMLElement>('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')
+      if (!focusable.length) return
+      const first = focusable[0]
+      const last = focusable[focusable.length - 1]
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus() }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus() }
+    }
     document.addEventListener('keydown', onKey)
     closeSourceRef.current?.focus()
-    return () => document.removeEventListener('keydown', onKey)
+    return () => { document.removeEventListener('keydown', onKey); prev?.focus?.() }
   }, [sourceOpen])
 
   const fail = (err: unknown) => setStatus({ kind: 'err', text: (err as Error)?.message || String(err) })
@@ -171,9 +183,18 @@ export function ModelConfiguratorPage(props: PageProps) {
     const model = sourceModel
     if (!info || !model) return
     const levels = info.reasoning && info.reasoning.efforts && info.reasoning.efforts.length
-      ? info.reasoning.efforts.map((e: any) => ({ level: e.level, wire: e.level === 'off' ? '' : e.level, on: true }))
+      ? info.reasoning.efforts
+          // Preset catalogs may advertise levels this plugin cannot express
+          // (e.g. gateway-specific ids); drop them instead of writing an
+          // entry the host would reject.
+          .filter((e: any) => THINKING_LEVELS.indexOf(e.level) >= 0)
+          .map((e: any) => ({ level: e.level, wire: e.level === 'off' ? '' : e.level, on: true }))
       : []
-    const hasInput = Array.isArray(info.input) && info.input.length > 0
+    // Only text/image are editable here; presets advertising other modalities
+    // (e.g. audio) stay "unset" so applying never strips the input field.
+    const rawInput = Array.isArray(info.input) ? info.input : []
+    const knownInput = rawInput.filter((m: any) => m === 'text' || m === 'image')
+    const hasInput = knownInput.length > 0
     setForm((f) => ({
       id: model,
       name: info.name || model,
@@ -182,8 +203,8 @@ export function ModelConfiguratorPage(props: PageProps) {
       // Absent preset knowledge stays "unset" (catalog inheritance) instead
       // of being forced to an explicit default.
       inputUnset: !hasInput,
-      inputText: !hasInput || info.input.indexOf('text') >= 0,
-      inputImage: !!(info.input && info.input.indexOf('image') >= 0),
+      inputText: !hasInput || knownInput.indexOf('text') >= 0,
+      inputImage: knownInput.indexOf('image') >= 0,
       reasoningMode: levels.length ? 'levels' : 'unset',
       levels,
       compatThinkingFormat: f.compatThinkingFormat,
@@ -249,7 +270,15 @@ export function ModelConfiguratorPage(props: PageProps) {
 
       <div className="mcfg-field">
         <span className="mcfg-label">{t('targetRoute')}</span>
-        <select className="mcfg-input mcfg-selectInput" value={targetRoute} onChange={(e) => { setTargetRoute(e.target.value); setLoadedEntryId('') }}>
+        <select className="mcfg-input mcfg-selectInput" value={targetRoute} onChange={(e) => {
+          // The form belongs to the target-provider context: switching target
+          // drops the loaded entry and the draft so a stale model from another
+          // provider can never be written into the new one by accident.
+          setTargetRoute(e.target.value)
+          setLoadedEntryId('')
+          setForm(emptyForm())
+          setStatus(null)
+        }}>
           <option value="">{t('targetRoutePlaceholder')}</option>
           {boot.targets.map((x) => (
             <option key={x.provider} value={x.provider}>{x.displayName + (x.declared ? ' · ' + t('customTag') : '')}</option>
@@ -328,12 +357,21 @@ export function ModelConfiguratorPage(props: PageProps) {
               {form.reasoningMode === 'levels' ? (
                 <div className="mcfg-field">
                   {form.levels.map((row, i) => (
+                    // Rows are fully controlled (no local state), so index
+                    // keys keep the DOM stable: changing a level select no
+                    // longer remounts the row and the wire input keeps focus.
+                    // Duplicate prevention comes from the disabled options
+                    // below plus the apply-time validation.
                     <div key={i} className="mcfg-row">
                       <label className="mcfg-check">
                         <input type="checkbox" checked={row.on === true} onChange={(e) => setLevel(i, { on: e.target.checked })} />
                       </label>
                       <select className="mcfg-input mcfg-selectInput mcfg-shrink" value={row.level} onChange={(e) => setLevel(i, { level: e.target.value })}>
-                        {THINKING_LEVELS.map((l) => <option key={l} value={l}>{l}</option>)}
+                        {THINKING_LEVELS.map((l) => (
+                          // Levels already used by another row are disabled so
+                          // rows can never become duplicates.
+                          <option key={l} value={l} disabled={form.levels.some((r, j) => j !== i && r.level === l)}>{l}</option>
+                        ))}
                       </select>
                       <input
                         className="mcfg-input"
@@ -385,7 +423,7 @@ export function ModelConfiguratorPage(props: PageProps) {
 
       {sourceOpen ? (
         <div className="mcfg-modalBackdrop" onClick={() => setSourceOpen(false)}>
-          <div className="mcfg-modal" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
+          <div ref={modalRef} className="mcfg-modal" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
             <div className="mcfg-modalHead">
               <span className="mcfg-modalTitle">{t('sourceTitle')}</span>
               <button ref={closeSourceRef} type="button" className="mcfg-btn mcfg-idBtn" aria-label={t('sourceTitle') + ' close'} onClick={() => setSourceOpen(false)}>

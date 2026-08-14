@@ -49,7 +49,8 @@ return {
       if (llm === undefined) return { ok: false, error: 'llm 服务不可用' }
       const provider = String((args && args.provider) || '')
       if (!provider) return { ok: false, error: '缺少复制来源提供商' }
-      const live = new Set(llm.listProviders().map((p) => p.id))
+      let live = new Set()
+      try { live = new Set(llm.listProviders().map((p) => p.id)) } catch (e) { /* provider list unavailable; treat all as dormant */ }
       try {
         let models
         if (live.has(provider)) models = await llm.listModels(provider)
@@ -76,7 +77,8 @@ return {
       const provider = String((args && args.provider) || '')
       const model = String((args && args.model) || '')
       if (!provider || !model) return { ok: false, error: '缺少复制来源提供商或模型' }
-      const live = new Set(llm.listProviders().map((p) => p.id))
+      let live = new Set()
+      try { live = new Set(llm.listProviders().map((p) => p.id)) } catch (e) { /* provider list unavailable; treat all as dormant */ }
       let name
       let contextWindow
       let maxTokens
@@ -163,8 +165,6 @@ return {
           hasModelOverrides: overrideCount > 0,
           catalogModels: [],
         }
-        if (typeof p.api === 'string') item.api = p.api
-        if (typeof p.baseURL === 'string') item.baseURL = p.baseURL
         items.push(item)
       }
       for (const item of items) {
@@ -197,7 +197,11 @@ return {
         return { ok: false, error: String((e && e.message) || e) }
       }
       const profile = providers[route]
-      if (!profile || typeof profile !== 'object') return { ok: false, error: `提供商 "${route}" 尚未配置,请先在 Models 页创建` }
+      // hasOwnProperty guards prototype keys (e.g. "__proto__") from ever
+      // being treated as a configured provider route.
+      if (!Object.prototype.hasOwnProperty.call(providers, route) || !profile || typeof profile !== 'object') {
+        return { ok: false, error: `提供商 "${route}" 尚未配置,请先在 Models 页创建` }
+      }
 
       const overrides = profile.modelOverrides && typeof profile.modelOverrides === 'object' && Object.keys(profile.modelOverrides).length
         ? profile.modelOverrides
@@ -210,7 +214,7 @@ return {
       const mt = Number(entry.maxTokens)
       if (Number.isInteger(mt) && mt > 0) built.maxTokens = mt
       if (Array.isArray(entry.input) && entry.input.length) {
-        const input = entry.input.filter((m) => m === 'text' || m === 'image')
+        const input = [...new Set(entry.input.filter((m) => m === 'text' || m === 'image'))]
         if (input.length) built.input = input
       }
       if (entry.reasoningEfforts === false) {
@@ -248,7 +252,11 @@ return {
         if (Object.keys(compat).length) built.compat = compat
       }
 
-      const existing = Array.isArray(profile.models) ? profile.models.map((m) => ({ ...m })) : []
+      // Model entries may be bare string ids (hand-written settings or legacy
+      // data); normalize them so the spread below never turns a string into
+      // an index-keyed object (which would corrupt the whole models list).
+      const toEntry = (m) => (m && typeof m === 'object' ? { ...m } : { id: String(m) })
+      const existing = Array.isArray(profile.models) ? profile.models.map(toEntry) : []
       let base = existing
       if (!base.length) {
         const llm = getLlm()
@@ -313,10 +321,12 @@ return {
         return { ok: false, error: String((e && e.message) || e) }
       }
       const profile = providers[route]
-      if (!profile || typeof profile !== 'object') return { ok: false, error: `提供商 "${route}" 尚未配置` }
+      if (!Object.prototype.hasOwnProperty.call(providers, route) || !profile || typeof profile !== 'object') {
+        return { ok: false, error: `提供商 "${route}" 尚未配置` }
+      }
       if (!Array.isArray(profile.models) || profile.models.length === 0) return { ok: false, error: `提供商 "${route}" 当前没有显式模型条目可删除` }
-      const models = profile.models.map((m) => ({ ...m }))
-      const idx = models.findIndex((m) => String(m && typeof m === 'object' ? m.id : m) === modelId)
+      const models = profile.models.map((m) => (m && typeof m === 'object' ? { ...m } : { id: String(m) }))
+      const idx = models.findIndex((m) => String(m && m.id) === modelId)
       if (idx < 0) return { ok: false, error: `模型 "${modelId}" 不存在于提供商 "${route}"` }
       models.splice(idx, 1)
       let revertedToCatalog = false
