@@ -1,7 +1,7 @@
 {
   "name": "dsh-provider-model-configurator",
   "description": "Provider Model Configurator for DeepSeek Harness: view, create, edit, copy and delete model entries (context window, max output, modalities, reasoning efforts) across your configured providers, with quick-fill from the pi-ai preset catalog.",
-  "version": "0.3.8",
+  "version": "0.3.9",
   "license": "MIT",
   "type": "module",
   "main": "lib/index.js",
@@ -29,7 +29,7 @@
     "lib/client.js",
     "lib/contract.js",
     "lib/index.js",
-    "lib/shared",
+    "shared",
     "cordis.patch.yml",
     "dsh.plugin.json",
     "README.md",

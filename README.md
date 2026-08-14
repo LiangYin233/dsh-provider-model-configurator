@@ -12,14 +12,14 @@
 
 ```sh
 # 从 GitHub 安装
-dsh plugin --profile web add github:LiangYin233/dsh-provider-model-configurator#v0.3.8
+dsh plugin --profile web add github:LiangYin233/dsh-provider-model-configurator#v0.3.9
 
 # 或从 GitHub tarball 安装
-dsh plugin --profile web add https://github.com/LiangYin233/dsh-provider-model-configurator/archive/refs/tags/v0.3.8.tar.gz
+dsh plugin --profile web add https://github.com/LiangYin233/dsh-provider-model-configurator/archive/refs/tags/v0.3.9.tar.gz
 
 # 或从本地打包安装
 npm pack
-dsh plugin --profile web add ./dsh-provider-model-configurator-0.3.8.tgz
+dsh plugin --profile web add ./dsh-provider-model-configurator-0.3.9.tgz
 ```
 
 安装后**重启 Web 服务器并刷新页面**,打开设置 → 左侧导航「模型 Pro」(Models 页之后)。
@@ -43,8 +43,9 @@ dsh plugin --profile web add ./dsh-provider-model-configurator-0.3.8.tgz
 ├── lib/                构建产物(随包发布,由 build.mjs 生成)
 │   ├── index.js        ← src/host/index.js
 │   ├── contract.js     ← src/host/contract.js
-│   ├── shared/         ← src/shared/thinking.js(共享常量)
 │   └── client.js       ← src/client/static.tsx
+├── shared/             构建产物:src/shared/thinking.js(共享常量;lib/contract.js
+│                       运行时按 ../shared/thinking.js 解析到包根目录)
 ├── src/
 │   ├── host/           Host 半区源码(index.js 静态 / dynamic.js 动态插件)
 │   ├── client/         Client 半区源码(page.tsx / model.ts / page.css / locales/)

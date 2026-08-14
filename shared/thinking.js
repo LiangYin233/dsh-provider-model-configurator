@@ -5,8 +5,9 @@
  * Imported by the host contract (src/host/contract.js), the client model
  * logic (src/client/model.ts) and verified against the standalone dynamic
  * host body (src/host/dynamic.js) by scripts/check-dynamic.mjs, so the three
- * copies can never drift silently. Copied to lib/shared/thinking.js by
- * build.mjs for the shipped package.
+ * copies can never drift silently. Copied to shared/thinking.js (package
+ * root) by build.mjs for the shipped package — lib/contract.js imports it
+ * via '../shared/thinking.js', which resolves to that root directory.
  */
 
 /** Reasoning effort levels accepted in a profile's reasoningEfforts map. */

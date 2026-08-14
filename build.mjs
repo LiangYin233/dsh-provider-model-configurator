@@ -5,7 +5,8 @@
  *   node build.mjs            → lib/client.js (ModuleLoader bundle + map),
  *                               the static bundle client shipped by the package;
  *                               lib/index.js + lib/contract.js re-copied from
- *                               src/host/ (the shipped host half)
+ *                               src/host/ (the shipped host half);
+ *                               shared/thinking.js re-copied from src/shared/
  *   node build.mjs --dynamic  → dist/dynamic-client-body.js, a plain JS
  *                               function body for cordis_define `code.client`
  *                               (free symbols: React, styles, host, ctx)
@@ -66,7 +67,10 @@ await copyFile('src/host/index.js', 'lib/index.js')
 await copyFile('src/host/contract.js', 'lib/contract.js')
 console.log('host sources → lib/index.js + lib/contract.js')
 
-// Shared constants are imported by lib/contract.js at runtime.
-await mkdir('lib/shared', { recursive: true })
-await copyFile('src/shared/thinking.js', 'lib/shared/thinking.js')
-console.log('shared constants → lib/shared/thinking.js')
+// Shared constants are imported by lib/contract.js at runtime via
+// '../shared/thinking.js'; from lib/ that resolves to the package-root
+// shared/ directory — the same relative layout as src/ (src/host →
+// src/shared). Emit it there so the shipped package can be imported.
+await mkdir('shared', { recursive: true })
+await copyFile('src/shared/thinking.js', 'shared/thinking.js')
+console.log('shared constants → shared/thinking.js')

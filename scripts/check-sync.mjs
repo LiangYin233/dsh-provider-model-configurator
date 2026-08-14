@@ -13,11 +13,11 @@ import { createHash } from 'node:crypto'
 let failed = false
 const fail = (msg) => { failed = true; console.error(`✗ ${msg}`) }
 
-// 1. Files copied verbatim from src to lib by build.mjs.
+// 1. Files copied verbatim from src by build.mjs.
 const pairs = [
   ['src/host/index.js', 'lib/index.js'],
   ['src/host/contract.js', 'lib/contract.js'],
-  ['src/shared/thinking.js', 'lib/shared/thinking.js'],
+  ['src/shared/thinking.js', 'shared/thinking.js'],
 ]
 let stale = 0
 for (const [src, lib] of pairs) {
