@@ -27,7 +27,7 @@ dsh plugin --profile web add ./dsh-provider-model-configurator-0.3.4.tgz
 ## 功能
 
 - 选择**目标提供商**,列出其显式模型条目与配置摘要,可**编辑 / 删除**;
-- **新建**:输入模型 ID,手动填写显示名、上下文窗口、最大输出、输入模态(text/image)、推理档位(档位 → wire 值,`off` 留空 = 不发送);
+- **新建**:输入模型 ID,手动填写显示名、上下文窗口、最大输出、输入模态(text/image)、推理档位(档位 → wire 值,`off` 留空 = 不发送);推理档位与输入模态均支持「未设置(继承目录)」,避免把未配置的字段写成显式默认值;
 - **复制填充**:「使用模型预设」打开来源选择器,从预设目录或其他提供商挑一个模型快速填充表单;
 - **兼容开关 (compat)**:编辑 `thinkingFormat`(openai / deepseek / openrouter / together / zai / qwen / string-thinking / ant-ling)与 `supportsReasoningEffort`(true / false / 未设置),供 openai-completions 推理分发读取;
 
@@ -41,10 +41,15 @@ dsh plugin --profile web add ./dsh-provider-model-configurator-0.3.4.tgz
 ├── lib/                构建产物(随包发布,由 build.mjs 生成)
 │   ├── index.js        ← src/host/index.js
 │   ├── contract.js     ← src/host/contract.js
+│   ├── shared/         ← src/shared/thinking.js(共享常量)
 │   └── client.js       ← src/client/static.tsx
 ├── src/
 │   ├── host/           Host 半区源码(index.js 静态 / dynamic.js 动态插件)
-│   └── client/         Client 半区源码(page.tsx / model.ts / page.css / locales/)
+│   ├── client/         Client 半区源码(page.tsx / model.ts / page.css / locales/)
+│   └── shared/         thinking.js — 推理档位 / 推理格式常量的单一来源
+├── scripts/
+│   └── check-dynamic.mjs  动态半区语法校验 + 常量同步校验(npm run check 执行)
+├── .github/workflows/  CI(typecheck / build / 动态半区校验)
 ├── build.mjs           esbuild 构建(lib/ 与 dist/dynamic-client-body.js)
 └── tsconfig.json
 ```

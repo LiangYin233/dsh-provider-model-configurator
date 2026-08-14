@@ -67,12 +67,15 @@ export function apply(ctx: any): void {
     const remoteName = METHOD_MAP[method]
     const args = (PARAM_ORDER[method] || []).map((key) => (payload || {})[key])
     const r = await remote[remoteName](...args)
+    // Error payloads may carry the message as a string or as { message }.
+    const msgOf = (e: unknown): string =>
+      typeof e === 'string' ? e : (e && typeof e === 'object' && typeof (e as any).message === 'string' ? (e as any).message : '')
     if (r === null || typeof r !== 'object' || r.ok !== true) {
-      throw new Error((r && r.error && r.error.message) || '调用失败')
+      throw new Error(msgOf((r as any)?.error) || '调用失败')
     }
-    const value = r.value
+    const value = (r as any).value
     if (value && value.ok === true) return value
-    throw new Error((value && value.error) || '调用失败')
+    throw new Error(msgOf((value as any)?.error) || '调用失败')
   }
 
   const slots = ctx.get('slots') ?? ctx.slots

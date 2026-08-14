@@ -26,17 +26,21 @@
     }
   },
   "files": [
-    "lib",
+    "lib/client.js",
+    "lib/contract.js",
+    "lib/index.js",
+    "lib/shared",
     "cordis.patch.yml",
     "dsh.plugin.json",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "docs"
   ],
   "scripts": {
     "build": "node build.mjs",
     "build:dynamic": "node build.mjs --dynamic",
     "typecheck": "tsc --noEmit",
-    "check": "npm run typecheck && npm run build && node --check src/host/contract.js && node --check src/host/index.js"
+    "check": "npm run typecheck && npm run build:dynamic && npm run build && node scripts/check-dynamic.mjs && node --check src/host/contract.js && node --check src/host/index.js"
   },
   "devDependencies": {
     "@types/react": "^18.3.0",

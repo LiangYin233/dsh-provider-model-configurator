@@ -35,14 +35,6 @@
   gap: 12px;
 }
 
-.mcfg-cardTitle {
-  color: var(--dsw-alias-label-primary);
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 20px;
-  margin: 0;
-}
-
 .mcfg-field {
   display: flex;
   flex-direction: column;
@@ -255,21 +247,5 @@
   color: var(--dsw-alias-state-error-primary);
   font-size: 13px;
   line-height: 20px;
-  margin: 0;
-}
-
-.mcfg-code {
-  background: var(--dsw-alias-bg-base);
-  border: 1px solid var(--dsw-alias-border-l1);
-  border-radius: 8px;
-  padding: 10px;
-  font-family: ui-monospace, Consolas, monospace;
-  font-size: 12px;
-  line-height: 18px;
-  white-space: pre-wrap;
-  word-break: break-all;
-  color: var(--dsw-alias-label-secondary);
-  max-height: 260px;
-  overflow: auto;
   margin: 0;
 }

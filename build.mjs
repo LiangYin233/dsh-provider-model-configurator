@@ -60,3 +60,8 @@ if (dynamic) {
 await copyFile('src/host/index.js', 'lib/index.js')
 await copyFile('src/host/contract.js', 'lib/contract.js')
 console.log('host sources → lib/index.js + lib/contract.js')
+
+// Shared constants are imported by lib/contract.js at runtime.
+await mkdir('lib/shared', { recursive: true })
+await copyFile('src/shared/thinking.js', 'lib/shared/thinking.js')
+console.log('shared constants → lib/shared/thinking.js')

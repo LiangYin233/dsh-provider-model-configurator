@@ -3,13 +3,19 @@
  * dynamic plugin). Pure data transformations — no React, no DOM, no host RPC.
  */
 
-/** Canonical reasoning effort levels (wire names). */
-export const THINKING_LEVELS = ['off', 'minimal', 'low', 'medium', 'high', 'xhigh', 'max']
+import { THINKING_LEVELS as LEVELS, THINKING_FORMATS as FORMATS } from '../shared/thinking.js'
+
+/** Canonical reasoning effort levels (wire names), from the shared source. */
+export const THINKING_LEVELS: readonly string[] = LEVELS
 
 /** Reasoning-dispatch wire formats DSH (dsh-llm-pi-ai) accepts. */
-export const THINKING_FORMATS = ['openai', 'deepseek', 'openrouter', 'together', 'zai', 'qwen', 'string-thinking', 'ant-ling']
+export const THINKING_FORMATS: readonly string[] = FORMATS
 
-/** Build one profile model entry object from the form state. */
+/**
+ * Build one profile model entry object from the form state.
+ * `reasoningMode: 'unset'` and `inputUnset: true` mean "no field written" —
+ * the entry keeps (or inherits) the catalog value instead of an explicit one.
+ */
 export function buildEntry(form: any): any {
   const e: any = { id: form.id.trim() }
   if (form.name && form.name.trim()) e.name = form.name.trim()
@@ -17,13 +23,15 @@ export function buildEntry(form: any): any {
   if (Number.isInteger(cw) && cw > 0) e.contextWindow = cw
   const mt = Number(form.maxTokens)
   if (Number.isInteger(mt) && mt > 0) e.maxTokens = mt
-  const input: string[] = []
-  if (form.inputText) input.push('text')
-  if (form.inputImage) input.push('image')
-  if (input.length) e.input = input
+  if (!form.inputUnset) {
+    const input: string[] = []
+    if (form.inputText) input.push('text')
+    if (form.inputImage) input.push('image')
+    if (input.length) e.input = input
+  }
   if (form.reasoningMode === 'off') {
     e.reasoningEfforts = false
-  } else {
+  } else if (form.reasoningMode === 'levels') {
     const efforts: Record<string, string | null> = {}
     for (const row of form.levels) {
       if (!row.on) continue
@@ -40,11 +48,16 @@ export function buildEntry(form: any): any {
   return e
 }
 
-/** Convert one existing model entry back into editable form state. */
+/**
+ * Convert one existing model entry back into editable form state.
+ * Absent `reasoningEfforts` / `input` fields map to the 'unset' states so a
+ * re-apply keeps them inherited instead of writing explicit defaults.
+ */
 export function entryToForm(entry: any): any {
   const input = Array.isArray(entry.input) ? entry.input : []
-  const keys = entry.reasoningEfforts && typeof entry.reasoningEfforts === 'object' && !Array.isArray(entry.reasoningEfforts)
-    ? Object.keys(entry.reasoningEfforts)
+  const re = entry.reasoningEfforts
+  const keys = re && typeof re === 'object' && !Array.isArray(re)
+    ? Object.keys(re)
     : []
   const compat = entry.compat && typeof entry.compat === 'object' && !Array.isArray(entry.compat) ? entry.compat : {}
   return {
@@ -52,12 +65,13 @@ export function entryToForm(entry: any): any {
     name: typeof entry.name === 'string' ? entry.name : '',
     contextWindow: entry.contextWindow ? String(entry.contextWindow) : '',
     maxTokens: entry.maxTokens ? String(entry.maxTokens) : '',
+    inputUnset: !Object.prototype.hasOwnProperty.call(entry, 'input'),
     inputText: !input.length || input.indexOf('text') >= 0,
     inputImage: input.indexOf('image') >= 0,
-    reasoningMode: keys.length ? 'levels' : 'off',
+    reasoningMode: re === false ? 'off' : (keys.length ? 'levels' : 'unset'),
     levels: keys.map((level: string) => ({
       level,
-      wire: level === 'off' ? '' : (typeof entry.reasoningEfforts[level] === 'string' ? entry.reasoningEfforts[level] : ''),
+      wire: level === 'off' ? '' : (typeof re[level] === 'string' ? re[level] : ''),
       on: true,
     })),
     compatThinkingFormat: typeof compat.thinkingFormat === 'string' ? compat.thinkingFormat : '',

@@ -30,7 +30,6 @@ return {
           if (section && typeof section === 'object' && section.providers && typeof section.providers === 'object') configured = section.providers
         } catch (e) { /* resolved value unavailable */ }
       }
-      const live = new Set(llm.listProviders().map((p) => p.id))
       let dir = []
       try { dir = llm.listConfigurableProviders() } catch (e) { /* no directory */ }
       const items = dir
@@ -39,7 +38,6 @@ return {
           provider: e.provider,
           displayName: e.displayName,
           declared: e.declared === true,
-          registered: live.has(e.provider),
           configured: Object.prototype.hasOwnProperty.call(configured, e.provider),
         }))
       items.sort((a, b) => (b.configured - a.configured) || (Number(a.declared) - Number(b.declared)) || a.provider.localeCompare(b.provider))
@@ -111,7 +109,6 @@ return {
       const info = {
         provider,
         model,
-        registered: live.has(provider),
         name: name || model,
         reasoning,
         ...(contextWindow !== undefined ? { contextWindow } : {}),

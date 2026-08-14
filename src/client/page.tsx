@@ -25,7 +25,7 @@ type Status = { kind: 'ok' | 'err'; text: string }
 
 /** The pristine form state; also used to reset after a successful delete. */
 function emptyForm() {
-  return { id: '', name: '', contextWindow: '', maxTokens: '', inputText: true, inputImage: false, reasoningMode: 'off', levels: [] as any[], compatThinkingFormat: '', compatSupportsReasoningEffort: '' }
+  return { id: '', name: '', contextWindow: '', maxTokens: '', inputUnset: true, inputText: true, inputImage: false, reasoningMode: 'unset', levels: [] as any[], compatThinkingFormat: '', compatSupportsReasoningEffort: '' }
 }
 
 export function ModelConfiguratorPage(props: PageProps) {
@@ -43,11 +43,21 @@ export function ModelConfiguratorPage(props: PageProps) {
   const [busy, setBusy] = React.useState(false)
   const [status, setStatus] = React.useState<Status | null>(null)
   const [sourceOpen, setSourceOpen] = React.useState(false)
+  const closeSourceRef = React.useRef<HTMLButtonElement>(null)
+
+  // Modal keyboard support: Escape closes, focus moves to the close button.
+  React.useEffect(() => {
+    if (!sourceOpen) return
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setSourceOpen(false) }
+    document.addEventListener('keydown', onKey)
+    closeSourceRef.current?.focus()
+    return () => document.removeEventListener('keydown', onKey)
+  }, [sourceOpen])
 
   const fail = (err: unknown) => setStatus({ kind: 'err', text: (err as Error)?.message || String(err) })
   const refresh = async () => {
     const b = await call('target-providers')
-    if (b && b.ok === true) setBoot((x) => ({ ...x, targets: b.providers }))
+    if (b && b.ok === true) setBoot((x) => ({ ...x, targets: b.providers, writable: b.writable !== false }))
   }
 
   React.useEffect(() => {
@@ -82,7 +92,13 @@ export function ModelConfiguratorPage(props: PageProps) {
     levels: f.levels.map((row, i) => (i === index ? { ...row, ...patch } : row)),
   }))
   const removeLevel = (index: number) => setForm((f) => ({ ...f, levels: f.levels.filter((_, i) => i !== index) }))
-  const addLevel = () => setForm((f) => ({ ...f, levels: [...f.levels, { level: 'low', wire: '', on: true }] }))
+  /** Add a level row that is not already present, so rows stay unique. */
+  const addLevel = () => setForm((f) => {
+    const used = new Set(f.levels.map((r: any) => r.level))
+    const next = THINKING_LEVELS.find((l) => !used.has(l)) || 'low'
+    return { ...f, levels: [...f.levels, { level: next, wire: '', on: true }] }
+  })
+  const allLevelsUsed = new Set(form.levels.map((r: any) => r.level)).size >= THINKING_LEVELS.length
 
   const loadEntry = (entry: any) => {
     setForm(entryToForm(entry))
@@ -157,14 +173,18 @@ export function ModelConfiguratorPage(props: PageProps) {
     const levels = info.reasoning && info.reasoning.efforts && info.reasoning.efforts.length
       ? info.reasoning.efforts.map((e: any) => ({ level: e.level, wire: e.level === 'off' ? '' : e.level, on: true }))
       : []
+    const hasInput = Array.isArray(info.input) && info.input.length > 0
     setForm((f) => ({
       id: model,
       name: info.name || model,
       contextWindow: info.contextWindow ? String(info.contextWindow) : '',
       maxTokens: info.maxTokens ? String(info.maxTokens) : '',
-      inputText: !info.input || info.input.indexOf('text') >= 0,
+      // Absent preset knowledge stays "unset" (catalog inheritance) instead
+      // of being forced to an explicit default.
+      inputUnset: !hasInput,
+      inputText: !hasInput || info.input.indexOf('text') >= 0,
       inputImage: !!(info.input && info.input.indexOf('image') >= 0),
-      reasoningMode: levels.length ? 'levels' : 'off',
+      reasoningMode: levels.length ? 'levels' : 'unset',
       levels,
       compatThinkingFormat: f.compatThinkingFormat,
       compatSupportsReasoningEffort: f.compatSupportsReasoningEffort,
@@ -183,8 +203,15 @@ export function ModelConfiguratorPage(props: PageProps) {
     }
     // M8: a checked non-off level with an empty wire must fail here, loudly,
     // instead of being silently dropped by buildEntry (which only writes
-    // levels that have a wire value).
+    // levels that have a wire value). Duplicate levels are rejected too —
+    // buildEntry would silently collapse them (last one wins).
     if (form.reasoningMode === 'levels') {
+      const seen = new Set<string>()
+      for (const row of form.levels) {
+        if (row.on !== true) continue
+        if (seen.has(row.level)) { setStatus({ kind: 'err', text: t('dupLevel').replace('{level}', row.level) }); return }
+        seen.add(row.level)
+      }
       const emptyWire = form.levels.find((row: any) => row.on === true && row.level !== 'off' && !String(row.wire || '').trim())
       if (emptyWire) { setStatus({ kind: 'err', text: t('wireRequired').replace('{level}', emptyWire.level) }); return }
     }
@@ -194,12 +221,14 @@ export function ModelConfiguratorPage(props: PageProps) {
     }
     // M1: empty form fields mean "delete this field from an existing entry"
     // (back to catalog inheritance), not "keep the previous value". The host
-    // strips these keys from the previous entry before merging.
+    // strips these keys from the previous entry before merging. The 'unset'
+    // reasoning / input states clear the whole field the same way.
     const clearFields: string[] = []
     if (!form.name.trim()) clearFields.push('name')
     if (!form.contextWindow.trim()) clearFields.push('contextWindow')
     if (!form.maxTokens.trim()) clearFields.push('maxTokens')
-    if (!form.inputText && !form.inputImage) clearFields.push('input')
+    if (form.inputUnset) clearFields.push('input')
+    if (form.reasoningMode === 'unset') clearFields.push('reasoningEfforts')
     if (form.compatThinkingFormat === '' && form.compatSupportsReasoningEffort === '') clearFields.push('compat')
     setBusy(true)
     setStatus(null)
@@ -279,16 +308,20 @@ export function ModelConfiguratorPage(props: PageProps) {
               <span className="mcfg-label">{t('inputField')}</span>
               <div className="mcfg-row">
                 <label className="mcfg-check">
-                  <input type="checkbox" checked={form.inputText} onChange={(e) => set({ inputText: e.target.checked })} />text
+                  <input type="checkbox" checked={form.inputUnset} onChange={(e) => set({ inputUnset: e.target.checked })} />{t('inputUnset')}
                 </label>
                 <label className="mcfg-check">
-                  <input type="checkbox" checked={form.inputImage} onChange={(e) => set({ inputImage: e.target.checked })} />image
+                  <input type="checkbox" checked={form.inputText} disabled={form.inputUnset} onChange={(e) => set({ inputText: e.target.checked })} />text
+                </label>
+                <label className="mcfg-check">
+                  <input type="checkbox" checked={form.inputImage} disabled={form.inputUnset} onChange={(e) => set({ inputImage: e.target.checked })} />image
                 </label>
               </div>
             </div>
             <div className="mcfg-field">
               <span className="mcfg-label">{t('reasoningField')}</span>
               <select className="mcfg-input mcfg-selectInput" value={form.reasoningMode} onChange={(e) => set({ reasoningMode: e.target.value })}>
+                <option value="unset">{t('reasoningModeUnset')}</option>
                 <option value="off">{t('reasoningModeOff')}</option>
                 <option value="levels">{t('reasoningModeLevels')}</option>
               </select>
@@ -312,7 +345,7 @@ export function ModelConfiguratorPage(props: PageProps) {
                     </div>
                   ))}
                   <div className="mcfg-row">
-                    <button type="button" className="mcfg-btn" onClick={addLevel}>+ {t('addLevel')}</button>
+                    <button type="button" className="mcfg-btn" disabled={allLevelsUsed} onClick={addLevel}>+ {t('addLevel')}</button>
                   </div>
                   <p className="mcfg-hint">{presetInfo && !(presetInfo.reasoning && presetInfo.reasoning.efforts.length) ? t('unknownReasoning') : t('reasoningHint')}</p>
                 </div>
@@ -355,7 +388,7 @@ export function ModelConfiguratorPage(props: PageProps) {
           <div className="mcfg-modal" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
             <div className="mcfg-modalHead">
               <span className="mcfg-modalTitle">{t('sourceTitle')}</span>
-              <button type="button" className="mcfg-btn mcfg-idBtn" aria-label={t('sourceTitle') + ' close'} onClick={() => setSourceOpen(false)}>
+              <button ref={closeSourceRef} type="button" className="mcfg-btn mcfg-idBtn" aria-label={t('sourceTitle') + ' close'} onClick={() => setSourceOpen(false)}>
                 <svg width="14" height="14" viewBox="0 0 12 12" fill="none" aria-hidden="true">
                   <path d="M3 3l6 6M9 3l-6 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
                 </svg>
