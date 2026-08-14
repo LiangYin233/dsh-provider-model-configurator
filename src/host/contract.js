@@ -9,6 +9,9 @@
  */
 export const THINKING_LEVELS = ['off', 'minimal', 'low', 'medium', 'high', 'xhigh', 'max']
 
+/** Reasoning-dispatch wire formats DSH (dsh-llm-pi-ai) accepts. */
+export const THINKING_FORMATS = ['openai', 'deepseek', 'openrouter', 'together', 'zai', 'qwen', 'string-thinking', 'ant-ling']
+
 /** One strict codec: only `parse` is required by the typert boundary. */
 const schema = (parse) => ({ parse })
 

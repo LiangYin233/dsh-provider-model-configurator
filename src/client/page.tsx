@@ -6,7 +6,7 @@
  * Entries: ./static.tsx (bundle) and ./dynamic.ts (dynamic plugin).
  */
 
-import { THINKING_LEVELS, buildEntry, entryToForm, modelSummary } from './model.js'
+import { THINKING_LEVELS, THINKING_FORMATS, buildEntry, entryToForm, modelSummary } from './model.js'
 
 export type Translate = (key: string) => string
 export type Call = (method: string, payload?: Record<string, unknown>) => Promise<any>
@@ -32,7 +32,7 @@ export function ModelConfiguratorPage(props: PageProps) {
   const [presetInfo, setPresetInfo] = React.useState<any>(null)
   const [busyModel, setBusyModel] = React.useState(false)
   const [targetRoute, setTargetRoute] = React.useState('')
-  const [form, setForm] = React.useState({ id: '', name: '', contextWindow: '', maxTokens: '', inputText: true, inputImage: false, reasoningMode: 'off', levels: [] as any[] })
+  const [form, setForm] = React.useState({ id: '', name: '', contextWindow: '', maxTokens: '', inputText: true, inputImage: false, reasoningMode: 'off', levels: [] as any[], compatThinkingFormat: '', compatSupportsReasoningEffort: '' })
   const [loadedEntryId, setLoadedEntryId] = React.useState('')
   const [deleting, setDeleting] = React.useState(false)
   const [busy, setBusy] = React.useState(false)
@@ -149,7 +149,7 @@ export function ModelConfiguratorPage(props: PageProps) {
     const levels = info.reasoning && info.reasoning.efforts && info.reasoning.efforts.length
       ? info.reasoning.efforts.map((e: any) => ({ level: e.level, wire: e.level === 'off' ? '' : e.level, on: true }))
       : []
-    setForm({
+    setForm((f) => ({
       id: model,
       name: info.name || model,
       contextWindow: info.contextWindow ? String(info.contextWindow) : '',
@@ -158,7 +158,9 @@ export function ModelConfiguratorPage(props: PageProps) {
       inputImage: !!(info.input && info.input.indexOf('image') >= 0),
       reasoningMode: levels.length ? 'levels' : 'off',
       levels,
-    })
+      compatThinkingFormat: f.compatThinkingFormat,
+      compatSupportsReasoningEffort: f.compatSupportsReasoningEffort,
+    }))
     setLoadedEntryId('')
     setSourceOpen(false)
   }
@@ -291,6 +293,27 @@ export function ModelConfiguratorPage(props: PageProps) {
                   <p className="mcfg-hint">{presetInfo && !(presetInfo.reasoning && presetInfo.reasoning.efforts.length) ? t('unknownReasoning') : t('reasoningHint')}</p>
                 </div>
               ) : null}
+            </div>
+            <div className="mcfg-field">
+              <span className="mcfg-label">{t('compatField')}</span>
+              <div className="mcfg-row">
+                <div className="mcfg-field" style={{ flex: '1' }}>
+                  <span className="mcfg-label">{t('compatThinkingFormat')}</span>
+                  <select className="mcfg-input mcfg-selectInput" value={form.compatThinkingFormat} onChange={(e) => set({ compatThinkingFormat: e.target.value })}>
+                    <option value="">{t('compatUnset')}</option>
+                    {THINKING_FORMATS.map((f) => <option key={f} value={f}>{f}</option>)}
+                  </select>
+                </div>
+                <div className="mcfg-field" style={{ flex: '1' }}>
+                  <span className="mcfg-label">{t('compatSupportsReasoningEffort')}</span>
+                  <select className="mcfg-input mcfg-selectInput" value={form.compatSupportsReasoningEffort} onChange={(e) => set({ compatSupportsReasoningEffort: e.target.value })}>
+                    <option value="">{t('compatUnset')}</option>
+                    <option value="true">true</option>
+                    <option value="false">false</option>
+                  </select>
+                </div>
+              </div>
+              <p className="mcfg-hint">{t('compatHint')}</p>
             </div>
           </div>
         </section>

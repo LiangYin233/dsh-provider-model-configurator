@@ -15,6 +15,7 @@ return {
   apply(ctx) {
     const NS = 'llm-pi-ai'
     const THINKING_LEVELS = ['off', 'minimal', 'low', 'medium', 'high', 'xhigh', 'max']
+    const THINKING_FORMATS = ['openai', 'deepseek', 'openrouter', 'together', 'zai', 'qwen', 'string-thinking', 'ant-ling']
     const getLlm = () => ctx.get('llm')
     const getSettings = () => ctx.get('settings')
 
@@ -230,6 +231,23 @@ return {
         if (Object.keys(efforts).length === 0) return { ok: false, error: '推理档位为空:请至少勾选一个档位,或选择「非推理模型」' }
         if (!hasThinking) return { ok: false, error: '推理档位必须包含至少一个非 off 档位' }
         built.reasoningEfforts = efforts
+      }
+      // DSH reasoning-dispatch compat switches (openai-completions only).
+      if (entry.compat && typeof entry.compat === 'object' && !Array.isArray(entry.compat)) {
+        const compat = {}
+        if (entry.compat.thinkingFormat !== undefined) {
+          if (typeof entry.compat.thinkingFormat !== 'string' || THINKING_FORMATS.indexOf(entry.compat.thinkingFormat) < 0) {
+            return { ok: false, error: `未知 thinkingFormat "${entry.compat.thinkingFormat}"` }
+          }
+          compat.thinkingFormat = entry.compat.thinkingFormat
+        }
+        if (entry.compat.supportsReasoningEffort !== undefined) {
+          if (typeof entry.compat.supportsReasoningEffort !== 'boolean') {
+            return { ok: false, error: 'supportsReasoningEffort 必须是布尔值' }
+          }
+          compat.supportsReasoningEffort = entry.compat.supportsReasoningEffort
+        }
+        if (Object.keys(compat).length) built.compat = compat
       }
 
       const existing = Array.isArray(profile.models) ? profile.models.map((m) => ({ ...m })) : []

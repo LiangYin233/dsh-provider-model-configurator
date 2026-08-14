@@ -6,6 +6,9 @@
 /** Canonical reasoning effort levels (wire names). */
 export const THINKING_LEVELS = ['off', 'minimal', 'low', 'medium', 'high', 'xhigh', 'max']
 
+/** Reasoning-dispatch wire formats DSH (dsh-llm-pi-ai) accepts. */
+export const THINKING_FORMATS = ['openai', 'deepseek', 'openrouter', 'together', 'zai', 'qwen', 'string-thinking', 'ant-ling']
+
 /** Build one profile model entry object from the form state. */
 export function buildEntry(form: any): any {
   const e: any = { id: form.id.trim() }
@@ -30,6 +33,10 @@ export function buildEntry(form: any): any {
     }
     if (Object.keys(efforts).length) e.reasoningEfforts = efforts
   }
+  const compat: Record<string, unknown> = {}
+  if (form.compatThinkingFormat) compat.thinkingFormat = form.compatThinkingFormat
+  if (form.compatSupportsReasoningEffort !== '') compat.supportsReasoningEffort = form.compatSupportsReasoningEffort === 'true'
+  if (Object.keys(compat).length) e.compat = compat
   return e
 }
 
@@ -39,6 +46,7 @@ export function entryToForm(entry: any): any {
   const keys = entry.reasoningEfforts && typeof entry.reasoningEfforts === 'object' && !Array.isArray(entry.reasoningEfforts)
     ? Object.keys(entry.reasoningEfforts)
     : []
+  const compat = entry.compat && typeof entry.compat === 'object' && !Array.isArray(entry.compat) ? entry.compat : {}
   return {
     id: typeof entry.id === 'string' ? entry.id : '',
     name: (typeof entry.name === 'string' ? entry.name : '') || (typeof entry.id === 'string' ? entry.id : ''),
@@ -52,6 +60,8 @@ export function entryToForm(entry: any): any {
       wire: level === 'off' ? '' : (typeof entry.reasoningEfforts[level] === 'string' ? entry.reasoningEfforts[level] : ''),
       on: true,
     })),
+    compatThinkingFormat: typeof compat.thinkingFormat === 'string' ? compat.thinkingFormat : '',
+    compatSupportsReasoningEffort: typeof compat.supportsReasoningEffort === 'boolean' ? String(compat.supportsReasoningEffort) : '',
   }
 }
 
@@ -65,6 +75,12 @@ export function modelSummary(entry: any): string {
   if (entry.reasoningEfforts && typeof entry.reasoningEfforts === 'object' && !Array.isArray(entry.reasoningEfforts)) {
     const keys = Object.keys(entry.reasoningEfforts)
     if (keys.length) parts.push('reasoning: ' + keys.join(','))
+  }
+  if (entry.compat && typeof entry.compat === 'object' && !Array.isArray(entry.compat)) {
+    const bits: string[] = []
+    if (typeof entry.compat.thinkingFormat === 'string') bits.push('tf: ' + entry.compat.thinkingFormat)
+    if (typeof entry.compat.supportsReasoningEffort === 'boolean') bits.push('sre: ' + entry.compat.supportsReasoningEffort)
+    if (bits.length) parts.push('compat: ' + bits.join(', '))
   }
   return parts.length ? parts.join(' · ') : '—'
 }
