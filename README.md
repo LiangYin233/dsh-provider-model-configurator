@@ -30,12 +30,19 @@ dsh plugin --profile web add ./dsh-provider-model-configurator-0.3.2.tgz
 - 内置目录路由应用后自动转为显式列表并**保留全部目录模型**,`modelOverrides` 折叠进对应条目;同名模型应用时弹窗确认覆盖;写入经 settings 校验器,立即生效,官方 Models 页自动刷新;
 - 只写 settings 文档,不接触任何 API 密钥。
 
+## 界面预览
+
+| 模型 Pro 设置页 | 复制来源选择器 |
+| --- | --- |
+| ![ui-1](docs/ui-1.png) | ![ui-2](docs/ui-2.png) |
+
 ## 仓库结构
 
 ```
 ├── package.json        bundle 清单(dsh.bundle.patch / dsh.client / exports)
 ├── cordis.patch.yml    bundle patch:挂载 dsh-provider-model-configurator
 ├── dsh.plugin.json     插件元数据(id / version / main)
+├── docs/               界面截图(README 预览用)
 ├── lib/                构建产物(随包发布,由 build.mjs 生成)
 │   ├── index.js        ← src/host/index.js
 │   ├── contract.js     ← src/host/contract.js
