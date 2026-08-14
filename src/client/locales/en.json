@@ -1,7 +1,7 @@
 {
   "nav": "Model Pro",
   "title": "Model Pro",
-  "intro": "Manage model configurations across your configured providers in one place: view, create, edit, copy and delete model entries (context window, max output, input modalities, reasoning efforts). Quick-fill from the pi-ai installed catalog (preset) or any other provider — no need to look fields up by hand while the catalog lags new releases.",
+  "intro": "Manage model entries across your providers in one place: view, create, edit, copy and delete, with context window, max output, modalities and reasoning efforts — quick-fill from model presets.",
   "readOnly": "Settings are read-only; writes are disabled.",
   "remotePending": "Remote service is not ready yet…",
   "sourceTitle": "Copy source (optional, for quick fill)",
