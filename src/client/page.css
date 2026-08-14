@@ -113,6 +113,68 @@
   margin-top: 4px;
 }
 
+/* Model-id input with a dropdown trigger button (floating menu). */
+.mcfg-idWrap {
+  position: relative;
+  display: flex;
+  gap: 6px;
+}
+
+.mcfg-idInput {
+  flex: 1;
+}
+
+.mcfg-idBtn {
+  width: 34px;
+  flex: none;
+  padding: 0;
+  font-size: 12px;
+  line-height: 1;
+}
+
+.mcfg-idBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 19;
+}
+
+.mcfg-idMenu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 240px;
+  overflow-y: auto;
+  padding: 4px;
+  border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: 8px;
+  background: var(--dsw-alias-bg-overlay);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.14);
+}
+
+.mcfg-idItem {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 6px 8px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--dsw-alias-label-primary);
+  font-family: inherit;
+  font-size: 13px;
+  line-height: 18px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.mcfg-idItem:hover {
+  background: var(--dsw-alias-interactive-bg-hover);
+}
+
 .mcfg-info {
   display: flex;
   flex-direction: column;

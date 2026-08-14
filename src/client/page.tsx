@@ -39,6 +39,7 @@ export function ModelConfiguratorPage(props: PageProps) {
   const [busy, setBusy] = React.useState(false)
   const [status, setStatus] = React.useState<Status | null>(null)
   const [showPreview, setShowPreview] = React.useState(false)
+  const [idMenuOpen, setIdMenuOpen] = React.useState(false)
 
   const fail = (err: unknown) => setStatus({ kind: 'err', text: (err as Error)?.message || String(err) })
   const refresh = async () => {
@@ -188,27 +189,36 @@ export function ModelConfiguratorPage(props: PageProps) {
       {boot.error ? <p className="mcfg-statusErr">{boot.error}</p> : null}
       {boot.writable === false ? <p className="mcfg-hint">{t('readOnly')}</p> : null}
 
-      <section className="mcfg-card">
-        <div className="mcfg-field">
-          <span className="mcfg-label">{t('targetRoute')}</span>
-          <select className="mcfg-input mcfg-selectInput" value={targetRoute} onChange={(e) => { setTargetRoute(e.target.value); setLoadedEntryId('') }}>
-            <option value="">{t('targetRoutePlaceholder')}</option>
-            {boot.targets.map((x) => (
-              <option key={x.provider} value={x.provider}>{x.displayName + (x.declared ? ' · ' + t('customTag') : '')}</option>
-            ))}
-          </select>
-          {boot.targets.length === 0 ? <p className="mcfg-hint">{t('emptyTargets')}</p> : null}
-        </div>
-        {target ? (
+      <div className="mcfg-field">
+        <span className="mcfg-label">{t('targetRoute')}</span>
+        <select className="mcfg-input mcfg-selectInput" value={targetRoute} onChange={(e) => { setTargetRoute(e.target.value); setLoadedEntryId(''); setIdMenuOpen(false) }}>
+          <option value="">{t('targetRoutePlaceholder')}</option>
+          {boot.targets.map((x) => (
+            <option key={x.provider} value={x.provider}>{x.displayName + (x.declared ? ' · ' + t('customTag') : '')}</option>
+          ))}
+        </select>
+        {boot.targets.length === 0 ? <p className="mcfg-hint">{t('emptyTargets')}</p> : null}
+      </div>
+
+      {target ? (
+        <section className="mcfg-card">
           <div className="mcfg-field">
             <span className="mcfg-label">{t('targetModels')}</span>
-            <input className="mcfg-input" list="mcfg-model-ids" value={form.id} placeholder="deepseek-v5" onChange={(e) => onIdChange(e.target.value)} />
-            <datalist id="mcfg-model-ids">{targetModelIds.map((id) => <option key={id} value={id} />)}</datalist>
+            <div className="mcfg-idWrap">
+              <input className="mcfg-input mcfg-idInput" value={form.id} placeholder="deepseek-v5" onChange={(e) => onIdChange(e.target.value)} />
+              <button type="button" className="mcfg-btn mcfg-idBtn" aria-label={t('targetModels')} onClick={() => setIdMenuOpen(!idMenuOpen)}>▾</button>
+              {idMenuOpen ? <div className="mcfg-idBackdrop" onClick={() => setIdMenuOpen(false)} /> : null}
+              {idMenuOpen ? (
+                <div className="mcfg-idMenu">
+                  {targetModelIds.map((id) => (
+                    <button key={id} type="button" className="mcfg-idItem" onClick={() => { onIdChange(id); setIdMenuOpen(false) }}>{id}</button>
+                  ))}
+                </div>
+              ) : null}
+            </div>
             {target.usesCatalog ? <p className="mcfg-note">{t('catalogRouteNote')}</p> : null}
             {target.hasModelOverrides ? <p className="mcfg-note">{t('overridesNote')}</p> : null}
           </div>
-        ) : null}
-        {target ? (
           <div className="mcfg-field">
             <span className="mcfg-label">{t('modelListTitle')}</span>
             {target.entries.length ? target.entries.map((m: any) => (
@@ -224,8 +234,6 @@ export function ModelConfiguratorPage(props: PageProps) {
               ? <p className="mcfg-hint">{t('catalogModelsHint') + ' ' + target.catalogModels.join(', ')}</p>
               : <p className="mcfg-hint">{t('noExplicitModels')}</p>)}
           </div>
-        ) : null}
-        {target ? (
           <div className="mcfg-field mcfg-divider">
             <span className="mcfg-label">{t('sourceTitle')}</span>
             {!sourceProvider ? <p className="mcfg-hint">{t('sourceOptionalHint')}</p> : null}
@@ -260,82 +268,82 @@ export function ModelConfiguratorPage(props: PageProps) {
               </div>
             ) : null}
           </div>
-        ) : null}
-        <div className="mcfg-field mcfg-divider">
-          {loadedEntryId === form.id.trim() ? <p className="mcfg-hint">{t('loadedHint')}</p> : null}
-          <div className="mcfg-row">
-            <div className="mcfg-field" style={{ flex: '1' }}>
-              <span className="mcfg-label">{t('entryId')}</span>
-              <input className="mcfg-input" value={form.id} onChange={(e) => onIdChange(e.target.value)} />
-            </div>
-            <div className="mcfg-field" style={{ flex: '1' }}>
-              <span className="mcfg-label">{t('entryName')}</span>
-              <input className="mcfg-input" value={form.name} onChange={(e) => set({ name: e.target.value })} />
-            </div>
-          </div>
-          <div className="mcfg-row">
-            <div className="mcfg-field" style={{ flex: '1' }}>
-              <span className="mcfg-label">{t('contextWindowField')}</span>
-              <input className="mcfg-input" type="number" min="1" value={form.contextWindow} onChange={(e) => set({ contextWindow: e.target.value })} />
-            </div>
-            <div className="mcfg-field" style={{ flex: '1' }}>
-              <span className="mcfg-label">{t('maxTokensField')}</span>
-              <input className="mcfg-input" type="number" min="1" value={form.maxTokens} onChange={(e) => set({ maxTokens: e.target.value })} />
-            </div>
-          </div>
-          <div className="mcfg-field">
-            <span className="mcfg-label">{t('inputField')}</span>
+          <div className="mcfg-field mcfg-divider">
+            {loadedEntryId === form.id.trim() ? <p className="mcfg-hint">{t('loadedHint')}</p> : null}
             <div className="mcfg-row">
-              <label className="mcfg-check">
-                <input type="checkbox" checked={form.inputText} onChange={(e) => set({ inputText: e.target.checked })} />text
-              </label>
-              <label className="mcfg-check">
-                <input type="checkbox" checked={form.inputImage} onChange={(e) => set({ inputImage: e.target.checked })} />image
-              </label>
+              <div className="mcfg-field" style={{ flex: '1' }}>
+                <span className="mcfg-label">{t('entryId')}</span>
+                <input className="mcfg-input" value={form.id} onChange={(e) => onIdChange(e.target.value)} />
+              </div>
+              <div className="mcfg-field" style={{ flex: '1' }}>
+                <span className="mcfg-label">{t('entryName')}</span>
+                <input className="mcfg-input" value={form.name} onChange={(e) => set({ name: e.target.value })} />
+              </div>
             </div>
-          </div>
-          <div className="mcfg-field">
-            <span className="mcfg-label">{t('reasoningField')}</span>
-            <select className="mcfg-input mcfg-selectInput" value={form.reasoningMode} onChange={(e) => set({ reasoningMode: e.target.value })}>
-              <option value="off">{t('reasoningModeOff')}</option>
-              <option value="levels">{t('reasoningModeLevels')}</option>
-            </select>
-            {form.reasoningMode === 'levels' ? (
-              <div className="mcfg-field">
-                {form.levels.map((row, i) => (
-                  <div key={i} className="mcfg-row">
-                    <label className="mcfg-check">
-                      <input type="checkbox" checked={row.on === true} onChange={(e) => setLevel(i, { on: e.target.checked })} />
-                    </label>
-                    <select className="mcfg-input mcfg-selectInput mcfg-shrink" value={row.level} onChange={(e) => setLevel(i, { level: e.target.value })}>
-                      {THINKING_LEVELS.map((l) => <option key={l} value={l}>{l}</option>)}
-                    </select>
-                    <input
-                      className="mcfg-input"
-                      value={row.wire}
-                      placeholder={row.level === 'off' ? t('wireOffHint') : t('wirePlaceholder')}
-                      onChange={(e) => setLevel(i, { wire: e.target.value })}
-                    />
-                    <button type="button" className="mcfg-btn mcfg-shrink" aria-label={t('removeLevel')} onClick={() => removeLevel(i)}>×</button>
+            <div className="mcfg-row">
+              <div className="mcfg-field" style={{ flex: '1' }}>
+                <span className="mcfg-label">{t('contextWindowField')}</span>
+                <input className="mcfg-input" type="number" min="1" placeholder="262144" value={form.contextWindow} onChange={(e) => set({ contextWindow: e.target.value })} />
+              </div>
+              <div className="mcfg-field" style={{ flex: '1' }}>
+                <span className="mcfg-label">{t('maxTokensField')}</span>
+                <input className="mcfg-input" type="number" min="1" placeholder="32768" value={form.maxTokens} onChange={(e) => set({ maxTokens: e.target.value })} />
+              </div>
+            </div>
+            <div className="mcfg-field">
+              <span className="mcfg-label">{t('inputField')}</span>
+              <div className="mcfg-row">
+                <label className="mcfg-check">
+                  <input type="checkbox" checked={form.inputText} onChange={(e) => set({ inputText: e.target.checked })} />text
+                </label>
+                <label className="mcfg-check">
+                  <input type="checkbox" checked={form.inputImage} onChange={(e) => set({ inputImage: e.target.checked })} />image
+                </label>
+              </div>
+            </div>
+            <div className="mcfg-field">
+              <span className="mcfg-label">{t('reasoningField')}</span>
+              <select className="mcfg-input mcfg-selectInput" value={form.reasoningMode} onChange={(e) => set({ reasoningMode: e.target.value })}>
+                <option value="off">{t('reasoningModeOff')}</option>
+                <option value="levels">{t('reasoningModeLevels')}</option>
+              </select>
+              {form.reasoningMode === 'levels' ? (
+                <div className="mcfg-field">
+                  {form.levels.map((row, i) => (
+                    <div key={i} className="mcfg-row">
+                      <label className="mcfg-check">
+                        <input type="checkbox" checked={row.on === true} onChange={(e) => setLevel(i, { on: e.target.checked })} />
+                      </label>
+                      <select className="mcfg-input mcfg-selectInput mcfg-shrink" value={row.level} onChange={(e) => setLevel(i, { level: e.target.value })}>
+                        {THINKING_LEVELS.map((l) => <option key={l} value={l}>{l}</option>)}
+                      </select>
+                      <input
+                        className="mcfg-input"
+                        value={row.wire}
+                        placeholder={row.level === 'off' ? t('wireOffHint') : t('wirePlaceholder')}
+                        onChange={(e) => setLevel(i, { wire: e.target.value })}
+                      />
+                      <button type="button" className="mcfg-btn mcfg-shrink" aria-label={t('removeLevel')} onClick={() => removeLevel(i)}>×</button>
+                    </div>
+                  ))}
+                  <div className="mcfg-row">
+                    <button type="button" className="mcfg-btn" onClick={addLevel}>+ {t('addLevel')}</button>
                   </div>
-                ))}
-                <div className="mcfg-row">
-                  <button type="button" className="mcfg-btn" onClick={addLevel}>+ {t('addLevel')}</button>
+                  <p className="mcfg-hint">{presetInfo && !(presetInfo.reasoning && presetInfo.reasoning.efforts.length) ? t('unknownReasoning') : t('reasoningHint')}</p>
                 </div>
-                <p className="mcfg-hint">{presetInfo && !(presetInfo.reasoning && presetInfo.reasoning.efforts.length) ? t('unknownReasoning') : t('reasoningHint')}</p>
+              ) : null}
+            </div>
+            {exists ? (
+              <div className="mcfg-field">
+                <p className="mcfg-note">{t('overwriteHint')}</p>
+                <label className="mcfg-check">
+                  <input type="checkbox" checked={overwrite} onChange={(e) => setOverwrite(e.target.checked)} />{t('overwriteLabel')}
+                </label>
               </div>
             ) : null}
           </div>
-          {exists ? (
-            <div className="mcfg-field">
-              <p className="mcfg-note">{t('overwriteHint')}</p>
-              <label className="mcfg-check">
-                <input type="checkbox" checked={overwrite} onChange={(e) => setOverwrite(e.target.checked)} />{t('overwriteLabel')}
-              </label>
-            </div>
-          ) : null}
-        </div>
-      </section>
+        </section>
+      ) : null}
 
       <div className="mcfg-row">
         <button type="button" className="mcfg-btnPrimary" disabled={busy || boot.writable === false || !target} onClick={apply}>
