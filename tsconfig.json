@@ -8,6 +8,7 @@
     "jsxFragmentFactory": "React.Fragment",
     "strict": true,
     "allowJs": true,
+    "resolveJsonModule": true,
     "noEmit": true,
     "skipLibCheck": true,
     "esModuleInterop": true,

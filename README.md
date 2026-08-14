@@ -67,10 +67,16 @@ dsh plugin --profile web add ./dsh-provider-model-configurator-0.3.1.tgz
 │   ├── contract.js     线契约:Invocation descriptors + Host Typert manifest
 │   └── client.js       构建产物:Client 半区(ModuleLoader bundle,由 src/ 生成)
 ├── src/
-│   ├── page.tsx        设置页 UI 单一源码(TSX/JSX,双语词典、构建与表单逻辑)
+│   ├── page.tsx        设置页 UI 单一源码(TSX/JSX,表单与构建逻辑)
+│   ├── page.css        页面样式(独立 CSS 文件)
+│   ├── locales/
+│   │   ├── zh.json     简体中文词典(一个语言一个 JSON)
+│   │   └── en.json     English dictionary
 │   ├── static.tsx      静态 bundle 入口(remote 适配、样式注入)
 │   ├── dynamic.ts      动态插件入口(host.call 适配、styles.insert)
-│   └── env.d.ts        运行环境符号声明(React / styles / host)
+│   ├── host.dyn.js     动态插件 Host 半区
+│   ├── env.d.ts        运行环境符号声明(React / styles / host)
+│   └── css.d.ts        *.css 文本导入声明
 ├── build.mjs           esbuild 构建:lib/client.js 与动态插件 code.client 函数体
 ├── tsconfig.json
 └── README.md
