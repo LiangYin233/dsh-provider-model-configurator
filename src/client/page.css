@@ -217,12 +217,16 @@
   padding: 0 16px;
   border-radius: 8px;
   border: none;
-  background: var(--dsw-alias-brand-primary);
-  color: #fff;
+  background: var(--dsw-alias-button-primary-fill);
+  color: var(--dsw-alias-label-primary-foreground);
   font-family: inherit;
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
+}
+
+.mcfg-btnPrimary:hover:not(:disabled) {
+  background: var(--dsw-alias-button-primary-hover);
 }
 
 .mcfg-btnPrimary:disabled {

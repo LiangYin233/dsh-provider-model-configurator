@@ -12,6 +12,9 @@
 
 ```sh
 # 从 GitHub 安装
+dsh plugin --profile web add github:LiangYin233/dsh-provider-model-configurator#v0.3.3
+
+# 或从 GitHub tarball 安装
 dsh plugin --profile web add https://github.com/LiangYin233/dsh-provider-model-configurator/archive/refs/tags/v0.3.3.tar.gz
 
 # 或从本地打包安装
