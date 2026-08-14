@@ -49,7 +49,6 @@ dsh plugin --profile web add ./dsh-provider-model-configurator-0.3.5.tgz
 │   └── shared/         thinking.js — 推理档位 / 推理格式常量的单一来源
 ├── scripts/
 │   └── check-dynamic.mjs  动态半区语法校验 + 常量同步校验(npm run check 执行)
-├── .github/workflows/  CI(typecheck / build / 动态半区校验)
 ├── build.mjs           esbuild 构建(lib/ 与 dist/dynamic-client-body.js)
 └── tsconfig.json
 ```
