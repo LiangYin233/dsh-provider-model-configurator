@@ -23,7 +23,6 @@
   "targetRoute": "Target provider",
   "targetRoutePlaceholder": "Choose a configured provider",
   "targetModels": "Model id (type a new model, or pick one from the list below)",
-  "modelListTitle": "Models of this provider (edit = load the config, delete = remove the entry)",
   "editModel": "Edit",
   "deleteModel": "Delete",
   "deleteConfirm": "Delete model \"{model}\"? This writes to settings immediately.",

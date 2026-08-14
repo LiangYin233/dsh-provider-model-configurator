@@ -23,7 +23,6 @@
   "targetRoute": "目标提供商",
   "targetRoutePlaceholder": "选择已配置的提供商",
   "targetModels": "模型 ID(可输入新模型,或从下方列表/现有模型中选择)",
-  "modelListTitle": "该提供商的模型(编辑 = 载入配置,删除 = 移除条目)",
   "editModel": "编辑",
   "deleteModel": "删除",
   "deleteConfirm": "确定删除模型「{model}」吗?此操作会立即写入设置。",

@@ -128,8 +128,18 @@
   width: 34px;
   flex: none;
   padding: 0;
-  font-size: 12px;
-  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--dsw-alias-label-secondary);
+}
+
+.mcfg-idBtn svg {
+  display: block;
+}
+
+.mcfg-idBtn:hover {
+  color: var(--dsw-alias-label-primary);
 }
 
 .mcfg-idBackdrop {

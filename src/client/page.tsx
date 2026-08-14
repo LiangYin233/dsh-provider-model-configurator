@@ -206,7 +206,11 @@ export function ModelConfiguratorPage(props: PageProps) {
             <span className="mcfg-label">{t('targetModels')}</span>
             <div className="mcfg-idWrap">
               <input className="mcfg-input mcfg-idInput" value={form.id} placeholder="deepseek-v5" onChange={(e) => onIdChange(e.target.value)} />
-              <button type="button" className="mcfg-btn mcfg-idBtn" aria-label={t('targetModels')} onClick={() => setIdMenuOpen(!idMenuOpen)}>▾</button>
+              <button type="button" className="mcfg-btn mcfg-idBtn" aria-label={t('targetModels')} onClick={() => setIdMenuOpen(!idMenuOpen)}>
+                <svg width="14" height="14" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                  <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
               {idMenuOpen ? <div className="mcfg-idBackdrop" onClick={() => setIdMenuOpen(false)} /> : null}
               {idMenuOpen ? (
                 <div className="mcfg-idMenu">
@@ -220,7 +224,6 @@ export function ModelConfiguratorPage(props: PageProps) {
             {target.hasModelOverrides ? <p className="mcfg-note">{t('overridesNote')}</p> : null}
           </div>
           <div className="mcfg-field">
-            <span className="mcfg-label">{t('modelListTitle')}</span>
             {target.entries.length ? target.entries.map((m: any) => (
               <div key={m.id} className="mcfg-row">
                 <div className="mcfg-field" style={{ flex: '1' }}>
