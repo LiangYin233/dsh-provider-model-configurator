@@ -38,7 +38,6 @@ export function ModelConfiguratorPage(props: PageProps) {
   const [deleting, setDeleting] = React.useState(false)
   const [busy, setBusy] = React.useState(false)
   const [status, setStatus] = React.useState<Status | null>(null)
-  const [idMenuOpen, setIdMenuOpen] = React.useState(false)
   const [sourceOpen, setSourceOpen] = React.useState(false)
 
   const fail = (err: unknown) => setStatus({ kind: 'err', text: (err as Error)?.message || String(err) })
@@ -141,24 +140,31 @@ export function ModelConfiguratorPage(props: PageProps) {
     try {
       const r = await call('preset-model-info', { provider: sourceProvider, model })
       if (!r || r.ok !== true) { setStatus({ kind: 'err', text: (r && r.error) || '读取来源模型信息失败' }); return }
-      const info = r.info
-      setPresetInfo(info)
-      const levels = info.reasoning && info.reasoning.efforts && info.reasoning.efforts.length
-        ? info.reasoning.efforts.map((e: any) => ({ level: e.level, wire: e.level === 'off' ? '' : e.level, on: true }))
-        : []
-      setForm({
-        id: model,
-        name: info.name || model,
-        contextWindow: info.contextWindow ? String(info.contextWindow) : '',
-        maxTokens: info.maxTokens ? String(info.maxTokens) : '',
-        inputText: !info.input || info.input.indexOf('text') >= 0,
-        inputImage: !!(info.input && info.input.indexOf('image') >= 0),
-        reasoningMode: levels.length ? 'levels' : 'off',
-        levels,
-      })
-      setOverwrite(false)
-      setLoadedEntryId('')
+      setPresetInfo(r.info)
     } catch (err) { fail(err) } finally { setBusyModel(false) }
+  }
+
+  /** Apply the selected preset to the form only when the user confirms. */
+  const applySource = () => {
+    const info = presetInfo
+    const model = sourceModel
+    if (!info || !model) return
+    const levels = info.reasoning && info.reasoning.efforts && info.reasoning.efforts.length
+      ? info.reasoning.efforts.map((e: any) => ({ level: e.level, wire: e.level === 'off' ? '' : e.level, on: true }))
+      : []
+    setForm({
+      id: model,
+      name: info.name || model,
+      contextWindow: info.contextWindow ? String(info.contextWindow) : '',
+      maxTokens: info.maxTokens ? String(info.maxTokens) : '',
+      inputText: !info.input || info.input.indexOf('text') >= 0,
+      inputImage: !!(info.input && info.input.indexOf('image') >= 0),
+      reasoningMode: levels.length ? 'levels' : 'off',
+      levels,
+    })
+    setOverwrite(false)
+    setLoadedEntryId('')
+    setSourceOpen(false)
   }
 
   const apply = async () => {
@@ -189,7 +195,7 @@ export function ModelConfiguratorPage(props: PageProps) {
 
       <div className="mcfg-field">
         <span className="mcfg-label">{t('targetRoute')}</span>
-        <select className="mcfg-input mcfg-selectInput" value={targetRoute} onChange={(e) => { setTargetRoute(e.target.value); setLoadedEntryId(''); setIdMenuOpen(false) }}>
+        <select className="mcfg-input mcfg-selectInput" value={targetRoute} onChange={(e) => { setTargetRoute(e.target.value); setLoadedEntryId('') }}>
           <option value="">{t('targetRoutePlaceholder')}</option>
           {boot.targets.map((x) => (
             <option key={x.provider} value={x.provider}>{x.displayName + (x.declared ? ' · ' + t('customTag') : '')}</option>
@@ -204,25 +210,7 @@ export function ModelConfiguratorPage(props: PageProps) {
             <span className="mcfg-label">{t('targetModels')}</span>
             <div className="mcfg-idWrap">
               <input className="mcfg-input mcfg-idInput" value={form.id} placeholder="deepseek-v5" onChange={(e) => onIdChange(e.target.value)} />
-              <button type="button" className="mcfg-btn mcfg-idBtn" aria-label={t('targetModels')} onClick={() => setIdMenuOpen(!idMenuOpen)}>
-                <svg width="14" height="14" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-                  <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </button>
-              <button type="button" className="mcfg-btn mcfg-idBtn" aria-label={t('sourceTitle')} onClick={() => setSourceOpen(true)}>
-                <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                  <path d="M6.5 2.5h6v9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                  <path d="M9.5 5.5v7h-6v-7h6Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
-                </svg>
-              </button>
-              {idMenuOpen ? <div className="mcfg-idBackdrop" onClick={() => setIdMenuOpen(false)} /> : null}
-              {idMenuOpen ? (
-                <div className="mcfg-idMenu">
-                  {targetModelIds.map((id) => (
-                    <button key={id} type="button" className="mcfg-idItem" onClick={() => { onIdChange(id); setIdMenuOpen(false) }}>{id}</button>
-                  ))}
-                </div>
-              ) : null}
+              <button type="button" className="mcfg-btn mcfg-shrink" onClick={() => setSourceOpen(true)}>{t('usePreset')}</button>
             </div>
             {target.usesCatalog ? <p className="mcfg-note">{t('catalogRouteNote')}</p> : null}
             {target.hasModelOverrides ? <p className="mcfg-note">{t('overridesNote')}</p> : null}
@@ -368,7 +356,7 @@ export function ModelConfiguratorPage(props: PageProps) {
             ) : null}
             {sourceProvider && sourceModel ? (
               <div className="mcfg-modalActions">
-                <button type="button" className="mcfg-btnPrimary" onClick={() => setSourceOpen(false)}>{t('useSource')}</button>
+                <button type="button" className="mcfg-btnPrimary" disabled={!presetInfo} onClick={applySource}>{t('useSource')}</button>
               </div>
             ) : null}
           </div>
