@@ -33,7 +33,6 @@ export function ModelConfiguratorPage(props: PageProps) {
   const [busyModel, setBusyModel] = React.useState(false)
   const [targetRoute, setTargetRoute] = React.useState('')
   const [form, setForm] = React.useState({ id: '', name: '', contextWindow: '', maxTokens: '', inputText: true, inputImage: false, reasoningMode: 'off', levels: [] as any[] })
-  const [overwrite, setOverwrite] = React.useState(false)
   const [loadedEntryId, setLoadedEntryId] = React.useState('')
   const [deleting, setDeleting] = React.useState(false)
   const [busy, setBusy] = React.useState(false)
@@ -83,14 +82,12 @@ export function ModelConfiguratorPage(props: PageProps) {
   const loadEntry = (entry: any) => {
     setForm(entryToForm(entry))
     setLoadedEntryId(entry.id)
-    setOverwrite(false)
     setStatus(null)
   }
 
   const onIdChange = (value: string) => {
     const id = value.trim()
     set({ id: value })
-    setOverwrite(false)
     if (!target || !id) { setLoadedEntryId(''); return }
     const found = (target.entries || []).find((e: any) => e && e.id === id) || null
     if (found && found.id !== loadedEntryId) loadEntry(found)
@@ -162,7 +159,6 @@ export function ModelConfiguratorPage(props: PageProps) {
       reasoningMode: levels.length ? 'levels' : 'off',
       levels,
     })
-    setOverwrite(false)
     setLoadedEntryId('')
     setSourceOpen(false)
   }
@@ -171,6 +167,10 @@ export function ModelConfiguratorPage(props: PageProps) {
     const id = form.id.trim()
     if (!targetRoute) { setStatus({ kind: 'err', text: t('needTarget') }); return }
     if (!id) { setStatus({ kind: 'err', text: t('entryId') + '?' }); return }
+    if (exists && !window.confirm(t('overwriteConfirm').replace('{model}', id))) {
+      setStatus(null)
+      return
+    }
     const entry = buildEntry(form)
     if (form.reasoningMode === 'levels' && !entry.reasoningEfforts) {
       setStatus({ kind: 'err', text: t('reasonEmpty') }); return
@@ -178,10 +178,9 @@ export function ModelConfiguratorPage(props: PageProps) {
     setBusy(true)
     setStatus(null)
     try {
-      const r = await call('apply-model-config', { route: targetRoute, entry, overwrite: overwrite === true })
+      const r = await call('apply-model-config', { route: targetRoute, entry, overwrite: true })
       if (!r || r.ok !== true) { setStatus({ kind: 'err', text: (r && r.error) || '应用失败' }); return }
       setStatus({ kind: 'ok', text: t('statusOk').replace('{model}', r.model).replace('{route}', r.route).replace('{count}', String(r.count)) })
-      setOverwrite(false)
       await refresh()
     } catch (err) { fail(err) } finally { setBusy(false) }
   }
@@ -293,14 +292,6 @@ export function ModelConfiguratorPage(props: PageProps) {
                 </div>
               ) : null}
             </div>
-            {exists ? (
-              <div className="mcfg-field">
-                <p className="mcfg-note">{t('overwriteHint')}</p>
-                <label className="mcfg-check">
-                  <input type="checkbox" checked={overwrite} onChange={(e) => setOverwrite(e.target.checked)} />{t('overwriteLabel')}
-                </label>
-              </div>
-            ) : null}
           </div>
         </section>
       ) : null}
