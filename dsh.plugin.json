@@ -1,8 +1,8 @@
 {
   "id": "dsh-model-config-sync",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "main": "lib/index.js",
-  "description": "Copy a preset model's context window, max output and reasoning efforts onto any configured custom provider, from a dedicated settings page.",
+  "description": "Provider Model Configurator: manage model configurations (context window, max output, modalities, reasoning efforts) across configured providers — view, create, edit, copy and delete model entries from a dedicated settings page.",
   "engines": {
     "dsh": ">=0.0.1"
   },
