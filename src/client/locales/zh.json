@@ -49,10 +49,9 @@
   "wireOffHint": "off:不发送",
   "overwriteLabel": "覆盖现有同名模型",
   "overwriteHint": "该模型 ID 已存在于目标提供商。",
-  "loadedHint": "已载入该模型的当前配置,可修改后重新应用;未编辑的字段会保留。",
   "apply": "应用配置",
   "applying": "应用中…",
-  "preview": "预览写入内容",
+  "useSource": "使用此来源",
   "statusOk": "已应用:模型 {model} 已写入提供商 {route}(共 {count} 个模型)。Models 页将自动刷新。",
   "reasonEmpty": "推理档位为空:请至少勾选一个非 off 档位,或选择「非推理模型」。",
   "needTarget": "请先选择目标提供商。"

@@ -185,6 +185,53 @@
   background: var(--dsw-alias-interactive-bg-hover);
 }
 
+/* Copy-source picker modal. */
+.mcfg-modalBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.mcfg-modal {
+  box-sizing: border-box;
+  width: min(440px, calc(100% - 32px));
+  max-height: calc(100vh - 64px);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: 12px;
+  background: var(--dsw-alias-bg-layer-2);
+  color: var(--dsw-alias-label-primary);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.24);
+}
+
+.mcfg-modalHead {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.mcfg-modalTitle {
+  color: var(--dsw-alias-label-primary);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+}
+
+.mcfg-modalActions {
+  display: flex;
+  justify-content: flex-end;
+}
+
 .mcfg-info {
   display: flex;
   flex-direction: column;

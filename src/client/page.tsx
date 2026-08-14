@@ -38,8 +38,8 @@ export function ModelConfiguratorPage(props: PageProps) {
   const [deleting, setDeleting] = React.useState(false)
   const [busy, setBusy] = React.useState(false)
   const [status, setStatus] = React.useState<Status | null>(null)
-  const [showPreview, setShowPreview] = React.useState(false)
   const [idMenuOpen, setIdMenuOpen] = React.useState(false)
+  const [sourceOpen, setSourceOpen] = React.useState(false)
 
   const fail = (err: unknown) => setStatus({ kind: 'err', text: (err as Error)?.message || String(err) })
   const refresh = async () => {
@@ -180,8 +180,6 @@ export function ModelConfiguratorPage(props: PageProps) {
     } catch (err) { fail(err) } finally { setBusy(false) }
   }
 
-  const previewEntry = targetRoute ? buildEntry(form) : null
-
   return (
     <div className="mcfg-page">
       <h2 className="mcfg-title">{t('title')}</h2>
@@ -211,6 +209,12 @@ export function ModelConfiguratorPage(props: PageProps) {
                   <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </button>
+              <button type="button" className="mcfg-btn mcfg-idBtn" aria-label={t('sourceTitle')} onClick={() => setSourceOpen(true)}>
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <path d="M6.5 2.5h6v9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M9.5 5.5v7h-6v-7h6Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+                </svg>
+              </button>
               {idMenuOpen ? <div className="mcfg-idBackdrop" onClick={() => setIdMenuOpen(false)} /> : null}
               {idMenuOpen ? (
                 <div className="mcfg-idMenu">
@@ -238,41 +242,6 @@ export function ModelConfiguratorPage(props: PageProps) {
               : <p className="mcfg-hint">{t('noExplicitModels')}</p>)}
           </div>
           <div className="mcfg-field mcfg-divider">
-            <span className="mcfg-label">{t('sourceTitle')}</span>
-            {!sourceProvider ? <p className="mcfg-hint">{t('sourceOptionalHint')}</p> : null}
-            <div className="mcfg-row">
-              <div className="mcfg-field" style={{ flex: '1' }}>
-                <select className="mcfg-input mcfg-selectInput" value={sourceProvider} disabled={busyModel} onChange={(e) => onSourceProvider(e.target.value)}>
-                  <option value="">{t('sourceProviderPlaceholder')}</option>
-                  {boot.providers.map((p) => (
-                    <option key={p.provider} value={p.provider}>
-                      {p.displayName + (p.configured ? ' · ' + t('configuredTag') : '') + (p.declared ? ' · ' + t('customTag') : '')}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              {sourceProvider ? <button type="button" className="mcfg-btn mcfg-shrink" onClick={clearSource}>{t('clearSource')}</button> : null}
-            </div>
-            {sourceProvider ? (
-              <div className="mcfg-field">
-                <select className="mcfg-input mcfg-selectInput" value={sourceModel} disabled={busyModel} onChange={(e) => onPresetModel(e.target.value)}>
-                  <option value="">{t('sourceModelPlaceholder')}</option>
-                  {sourceModels.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}
-                </select>
-                {busyModel ? <span className="mcfg-hint">{t('loading')}</span> : null}
-              </div>
-            ) : null}
-            {presetInfo ? (
-              <div className="mcfg-info">
-                <p className="mcfg-infoLine">{t('context') + ': ' + (presetInfo.contextWindow ? String(presetInfo.contextWindow) : '—')}</p>
-                <p className="mcfg-infoLine">{t('output') + ': ' + (presetInfo.maxTokens ? String(presetInfo.maxTokens) : '—')}</p>
-                <p className="mcfg-infoLine">{t('modalities') + ': ' + ((presetInfo.input && presetInfo.input.length) ? presetInfo.input.join(', ') : 'text')}</p>
-                <p className="mcfg-infoLine">{t('reasoningLevels') + ': ' + (presetInfo.reasoning ? presetInfo.reasoning.efforts.map((e: any) => e.level).join(', ') : t('unknownReasoning'))}</p>
-              </div>
-            ) : null}
-          </div>
-          <div className="mcfg-field mcfg-divider">
-            {loadedEntryId === form.id.trim() ? <p className="mcfg-hint">{t('loadedHint')}</p> : null}
             <div className="mcfg-row">
               <div className="mcfg-field" style={{ flex: '1' }}>
                 <span className="mcfg-label">{t('entryId')}</span>
@@ -352,10 +321,59 @@ export function ModelConfiguratorPage(props: PageProps) {
         <button type="button" className="mcfg-btnPrimary" disabled={busy || boot.writable === false || !target} onClick={apply}>
           {busy ? t('applying') : t('apply')}
         </button>
-        <button type="button" className="mcfg-btn" onClick={() => setShowPreview(!showPreview)}>{t('preview')}</button>
       </div>
-      {showPreview && previewEntry ? <pre className="mcfg-code">{JSON.stringify(previewEntry, null, 2)}</pre> : null}
       {status ? <p className={status.kind === 'ok' ? 'mcfg-statusOk' : 'mcfg-statusErr'} role="status" aria-live="polite">{status.text}</p> : null}
+
+      {sourceOpen ? (
+        <div className="mcfg-modalBackdrop" onClick={() => setSourceOpen(false)}>
+          <div className="mcfg-modal" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
+            <div className="mcfg-modalHead">
+              <span className="mcfg-modalTitle">{t('sourceTitle')}</span>
+              <button type="button" className="mcfg-btn mcfg-idBtn" aria-label={t('sourceTitle') + ' close'} onClick={() => setSourceOpen(false)}>
+                <svg width="14" height="14" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                  <path d="M3 3l6 6M9 3l-6 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                </svg>
+              </button>
+            </div>
+            {!sourceProvider ? <p className="mcfg-hint">{t('sourceOptionalHint')}</p> : null}
+            <div className="mcfg-row">
+              <div className="mcfg-field" style={{ flex: '1' }}>
+                <select className="mcfg-input mcfg-selectInput" value={sourceProvider} disabled={busyModel} onChange={(e) => onSourceProvider(e.target.value)}>
+                  <option value="">{t('sourceProviderPlaceholder')}</option>
+                  {boot.providers.map((p) => (
+                    <option key={p.provider} value={p.provider}>
+                      {p.displayName + (p.configured ? ' · ' + t('configuredTag') : '') + (p.declared ? ' · ' + t('customTag') : '')}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              {sourceProvider ? <button type="button" className="mcfg-btn mcfg-shrink" onClick={clearSource}>{t('clearSource')}</button> : null}
+            </div>
+            {sourceProvider ? (
+              <div className="mcfg-field">
+                <select className="mcfg-input mcfg-selectInput" value={sourceModel} disabled={busyModel} onChange={(e) => onPresetModel(e.target.value)}>
+                  <option value="">{t('sourceModelPlaceholder')}</option>
+                  {sourceModels.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}
+                </select>
+                {busyModel ? <span className="mcfg-hint">{t('loading')}</span> : null}
+              </div>
+            ) : null}
+            {presetInfo ? (
+              <div className="mcfg-info">
+                <p className="mcfg-infoLine">{t('context') + ': ' + (presetInfo.contextWindow ? String(presetInfo.contextWindow) : '—')}</p>
+                <p className="mcfg-infoLine">{t('output') + ': ' + (presetInfo.maxTokens ? String(presetInfo.maxTokens) : '—')}</p>
+                <p className="mcfg-infoLine">{t('modalities') + ': ' + ((presetInfo.input && presetInfo.input.length) ? presetInfo.input.join(', ') : 'text')}</p>
+                <p className="mcfg-infoLine">{t('reasoningLevels') + ': ' + (presetInfo.reasoning ? presetInfo.reasoning.efforts.map((e: any) => e.level).join(', ') : t('unknownReasoning'))}</p>
+              </div>
+            ) : null}
+            {sourceProvider && sourceModel ? (
+              <div className="mcfg-modalActions">
+                <button type="button" className="mcfg-btnPrimary" onClick={() => setSourceOpen(false)}>{t('useSource')}</button>
+              </div>
+            ) : null}
+          </div>
+        </div>
+      ) : null}
     </div>
   )
 }

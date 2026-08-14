@@ -49,10 +49,9 @@
   "wireOffHint": "off: send nothing",
   "overwriteLabel": "Overwrite the existing model with the same id",
   "overwriteHint": "This model id already exists on the target provider.",
-  "loadedHint": "Loaded the model's current configuration — edit and re-apply; untouched fields are kept.",
   "apply": "Apply configuration",
   "applying": "Applying…",
-  "preview": "Preview write",
+  "useSource": "Use this source",
   "statusOk": "Applied: model {model} written to provider {route} ({count} models total). The Models page refreshes automatically.",
   "reasonEmpty": "Reasoning efforts empty: check at least one non-off level, or choose non-reasoning.",
   "needTarget": "Choose a target provider first."
