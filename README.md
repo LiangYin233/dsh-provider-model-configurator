@@ -26,7 +26,7 @@ dsh plugin --profile web add https://github.com/LiangYin233/dsh-provider-model-c
 # 或从本地打包安装(开发时;git/registry 安装会把包物化为 profile 内的真实目录,
 # 而 pnpm 对 `add <目录>` 使用符号链接,宿主端 ESM 依赖解析会失效,请走 tarball)
 npm pack
-dsh plugin --profile web add ./dsh-provider-model-configurator-0.3.0.tgz
+dsh plugin --profile web add ./dsh-provider-model-configurator-0.3.1.tgz
 ```
 
 然后**重启** Web 服务器并刷新页面:
@@ -44,7 +44,7 @@ dsh plugin --profile web add ./dsh-provider-model-configurator-0.3.0.tgz
   - **删除** — 确认后移除该条目(删除最后一个条目时,该提供商自动恢复使用内置目录);
 - **新建 / 复制**:
   - 输入新模型 ID 手动填写(高级配置器),可自由添加/删除推理档位;
-  - 选择**复制来源**(预设目录或任意其他提供商)+ 模型 → 自动填充下方字段(快速填充);载入后把 ID 改成新值即可**复制为新模型**;
+  - 在所选提供商的模型管理页底部,可展开**复制来源**(预设目录或任意其他提供商)+ 模型 → 自动填充下方字段(快速填充);载入后把 ID 改成新值即可**复制为新模型**;
 - 同步/编辑字段:
   - 模型 ID、显示名称
   - `contextWindow`(上下文窗口)
@@ -74,8 +74,9 @@ dsh plugin --profile web add ./dsh-provider-model-configurator-0.3.0.tgz
 ```
 ┌─ Client(浏览器)────────────────────────────────┐
 │ settings.section 注册 React 页面(zh/en 双语)   │
-│   ├─ ① 复制来源(可选)  ② 提供商 · 模型管理    │
-│   │     ③ 模型配置(新建 / 编辑)               │
+│   ├─ ② 提供商 · 模型管理                      │
+│   │     (模型列表 + 编辑/删除 + 复制来源)      │
+│   └─ ③ 模型配置(新建 / 编辑)                  │
 │   └─ remote.modelConfigurator.*  ←→  Typert RPC  │
 └─────────────────────────────────────────────────┘
                   │  Connection /api 网关
@@ -115,7 +116,7 @@ dsh plugin --profile web add ./dsh-provider-model-configurator-0.3.0.tgz
 1. 安装 bundle 并重启 Web 服务器(见上);
 2. 打开 Web 设置 → 左侧导航「供应商模型配置器」(Models 页之后);
 3. ②选择目标提供商,查看其模型列表;点击「编辑」载入现有配置,或「删除」移除条目;
-4. ①(可选)选择复制来源(预设目录 / 其他提供商)+ 模型快速填充;③编辑模型字段与推理档位;
+4. 在该提供商的模型管理页底部,(可选)选择**复制来源**(预设目录 / 其他提供商)+ 模型快速填充;③编辑模型字段与推理档位;
 5. 「预览写入内容」核对 → 「应用配置」;
 6. 写入立即生效,官方 Models 页自动刷新;`$DSH_HOME/settings.yaml` 中 `llm-pi-ai.providers.<route>` 出现/更新 `models:` 列表。
 
