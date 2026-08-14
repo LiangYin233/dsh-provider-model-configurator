@@ -227,7 +227,7 @@ export function ModelConfiguratorPage(props: PageProps) {
     if (!form.name.trim()) clearFields.push('name')
     if (!form.contextWindow.trim()) clearFields.push('contextWindow')
     if (!form.maxTokens.trim()) clearFields.push('maxTokens')
-    if (form.inputUnset) clearFields.push('input')
+    if (form.inputUnset || (!form.inputText && !form.inputImage)) clearFields.push('input')
     if (form.reasoningMode === 'unset') clearFields.push('reasoningEfforts')
     if (form.compatThinkingFormat === '' && form.compatSupportsReasoningEffort === '') clearFields.push('compat')
     setBusy(true)
