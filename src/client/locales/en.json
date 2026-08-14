@@ -1,6 +1,6 @@
 {
-  "nav": "Provider Model Configurator",
-  "title": "Provider Model Configurator",
+  "nav": "Model Pro",
+  "title": "Model Pro",
   "intro": "Manage model configurations across your configured providers in one place: view, create, edit, copy and delete model entries (context window, max output, input modalities, reasoning efforts). Quick-fill from the pi-ai installed catalog (preset) or any other provider — no need to look fields up by hand while the catalog lags new releases.",
   "readOnly": "Settings are read-only; writes are disabled.",
   "remotePending": "Remote service is not ready yet…",

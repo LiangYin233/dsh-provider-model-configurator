@@ -4,9 +4,10 @@
 .mcfg-page {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  max-width: 680px;
+  gap: 12px;
+  max-width: 720px;
   padding: 4px 2px 24px;
+  color: var(--dsw-alias-label-primary);
 }
 
 .mcfg-title {
@@ -18,9 +19,9 @@
 }
 
 .mcfg-intro {
-  color: var(--dsw-alias-label-secondary);
-  font-size: 13px;
-  line-height: 20px;
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 14px;
+  line-height: 22px;
   margin: 0;
 }
 

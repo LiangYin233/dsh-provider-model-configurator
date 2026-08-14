@@ -14,8 +14,8 @@ export function apply(ctx: any): void {
   const locale = ctx.get('locale')
   if (locale !== undefined) {
     ctx.effect(() => locale.register(NS, {
-      zh: { ...zh, nav: '供应商模型配置器(动态)' },
-      en: { ...en, nav: 'Provider Model Configurator (dynamic)' },
+      zh: { ...zh, nav: '模型 Pro(动态)' },
+      en: { ...en, nav: 'Model Pro (dynamic)' },
     }), 'dsh-provider-model-configurator: dictionaries')
   }
   const t: Translate = locale !== undefined ? locale.bind(NS) : (key: string) => key
