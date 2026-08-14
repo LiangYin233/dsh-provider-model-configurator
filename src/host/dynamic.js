@@ -191,6 +191,7 @@ return {
       if (!entry || typeof entry.id !== 'string' || !entry.id.trim()) return { ok: false, error: '缺少模型 ID' }
       const id = entry.id.trim()
       if (!/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(id)) return { ok: false, error: '模型 ID 只能包含字母、数字、点、下划线与连字符' }
+      const clears = Array.isArray(args.clearFields) ? args.clearFields.filter((k) => typeof k === 'string') : []
       let providers = {}
       try {
         const section = st.get(NS)
@@ -266,9 +267,15 @@ return {
       }
       const idx = base.findIndex((m) => m.id === id)
       if (idx >= 0) {
-        if (args.overwrite !== true) return { ok: false, error: `模型 "${id}" 已存在;请勾选「覆盖现有同名模型」后重试` }
+        if (args.overwrite !== true) return { ok: false, error: `模型 "${id}" 已存在;请确认覆盖后重试` }
+        // Editing an existing model: keep every field the form does not edit
+        // (description, tools, …) and let the form fields win for the rest.
+        // Fields the form cleared (empty inputs / unset compat) are removed so
+        // they fall back to catalog inheritance instead of keeping stale values.
         const previous = base[idx] && typeof base[idx] === 'object' ? base[idx] : {}
-        base[idx] = { ...previous, ...built }
+        const kept = {}
+        for (const key of Object.keys(previous)) if (clears.indexOf(key) < 0) kept[key] = previous[key]
+        base[idx] = { ...kept, ...built }
       } else {
         base.push(built)
       }

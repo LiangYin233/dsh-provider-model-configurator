@@ -202,6 +202,15 @@
   background: var(--dsw-alias-interactive-bg-hover, var(--dsw-alias-bg-layer-1));
 }
 
+/* Compact square icon button (modal close). */
+.mcfg-idBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  padding: 0;
+}
+
 .mcfg-btnPrimary {
   box-sizing: border-box;
   height: 32px;

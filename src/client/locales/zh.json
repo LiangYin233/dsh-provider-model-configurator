@@ -59,5 +59,7 @@
   "useSource": "使用此来源",
   "statusOk": "已应用:模型 {model} 已写入提供商 {route}(共 {count} 个模型)。Models 页将自动刷新。",
   "reasonEmpty": "推理档位为空:请至少勾选一个非 off 档位,或选择「非推理模型」。",
+  "wireRequired": "档位「{level}」需要填写 wire 值,或取消勾选该档位。",
+  "needId": "请输入模型 ID。",
   "needTarget": "请先选择目标提供商。"
 }

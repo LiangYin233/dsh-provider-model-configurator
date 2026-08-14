@@ -23,6 +23,11 @@ export const en = enRaw satisfies Record<keyof typeof zh, string>
 
 type Status = { kind: 'ok' | 'err'; text: string }
 
+/** The pristine form state; also used to reset after a successful delete. */
+function emptyForm() {
+  return { id: '', name: '', contextWindow: '', maxTokens: '', inputText: true, inputImage: false, reasoningMode: 'off', levels: [] as any[], compatThinkingFormat: '', compatSupportsReasoningEffort: '' }
+}
+
 export function ModelConfiguratorPage(props: PageProps) {
   const { t, call } = props
   const [boot, setBoot] = React.useState({ providers: [] as any[], targets: [] as any[], writable: true, error: '' })
@@ -32,7 +37,7 @@ export function ModelConfiguratorPage(props: PageProps) {
   const [presetInfo, setPresetInfo] = React.useState<any>(null)
   const [busyModel, setBusyModel] = React.useState(false)
   const [targetRoute, setTargetRoute] = React.useState('')
-  const [form, setForm] = React.useState({ id: '', name: '', contextWindow: '', maxTokens: '', inputText: true, inputImage: false, reasoningMode: 'off', levels: [] as any[], compatThinkingFormat: '', compatSupportsReasoningEffort: '' })
+  const [form, setForm] = React.useState(emptyForm)
   const [loadedEntryId, setLoadedEntryId] = React.useState('')
   const [deleting, setDeleting] = React.useState(false)
   const [busy, setBusy] = React.useState(false)
@@ -102,6 +107,9 @@ export function ModelConfiguratorPage(props: PageProps) {
       const r = await call('delete-model', { route: targetRoute, modelId })
       if (!r || r.ok !== true) { setStatus({ kind: 'err', text: (r && r.error) || '删除失败' }); return }
       setStatus({ kind: 'ok', text: (r.revertedToCatalog === true ? t('statusDeletedCatalog') : t('statusDeleted')).replace('{model}', r.model).replace('{route}', r.route).replace('{count}', String(r.count)) })
+      // Reset the form so a stale entry cannot be re-applied as a new model.
+      setForm(emptyForm())
+      setLoadedEntryId('')
       await refresh()
     } catch (err) { fail(err) } finally { setDeleting(false) }
   }
@@ -168,19 +176,35 @@ export function ModelConfiguratorPage(props: PageProps) {
   const apply = async () => {
     const id = form.id.trim()
     if (!targetRoute) { setStatus({ kind: 'err', text: t('needTarget') }); return }
-    if (!id) { setStatus({ kind: 'err', text: t('entryId') + '?' }); return }
+    if (!id) { setStatus({ kind: 'err', text: t('needId') }); return }
     if (exists && !window.confirm(t('overwriteConfirm').replace('{model}', id))) {
       setStatus(null)
       return
+    }
+    // M8: a checked non-off level with an empty wire must fail here, loudly,
+    // instead of being silently dropped by buildEntry (which only writes
+    // levels that have a wire value).
+    if (form.reasoningMode === 'levels') {
+      const emptyWire = form.levels.find((row: any) => row.on === true && row.level !== 'off' && !String(row.wire || '').trim())
+      if (emptyWire) { setStatus({ kind: 'err', text: t('wireRequired').replace('{level}', emptyWire.level) }); return }
     }
     const entry = buildEntry(form)
     if (form.reasoningMode === 'levels' && !entry.reasoningEfforts) {
       setStatus({ kind: 'err', text: t('reasonEmpty') }); return
     }
+    // M1: empty form fields mean "delete this field from an existing entry"
+    // (back to catalog inheritance), not "keep the previous value". The host
+    // strips these keys from the previous entry before merging.
+    const clearFields: string[] = []
+    if (!form.name.trim()) clearFields.push('name')
+    if (!form.contextWindow.trim()) clearFields.push('contextWindow')
+    if (!form.maxTokens.trim()) clearFields.push('maxTokens')
+    if (!form.inputText && !form.inputImage) clearFields.push('input')
+    if (form.compatThinkingFormat === '' && form.compatSupportsReasoningEffort === '') clearFields.push('compat')
     setBusy(true)
     setStatus(null)
     try {
-      const r = await call('apply-model-config', { route: targetRoute, entry, overwrite: true })
+      const r = await call('apply-model-config', { route: targetRoute, entry, overwrite: true, clearFields })
       if (!r || r.ok !== true) { setStatus({ kind: 'err', text: (r && r.error) || '应用失败' }); return }
       setStatus({ kind: 'ok', text: t('statusOk').replace('{model}', r.model).replace('{route}', r.route).replace('{count}', String(r.count)) })
       await refresh()

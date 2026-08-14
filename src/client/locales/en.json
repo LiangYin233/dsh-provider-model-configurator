@@ -59,5 +59,7 @@
   "useSource": "Use this source",
   "statusOk": "Applied: model {model} written to provider {route} ({count} models total). The Models page refreshes automatically.",
   "reasonEmpty": "Reasoning efforts empty: check at least one non-off level, or choose non-reasoning.",
+  "wireRequired": "Level \"{level}\" needs a wire value; fill it in or uncheck the level.",
+  "needId": "Enter a model id.",
   "needTarget": "Choose a target provider first."
 }

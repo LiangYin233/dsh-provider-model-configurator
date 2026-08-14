@@ -28,7 +28,7 @@ const METHOD_MAP: Record<string, string> = {
 const PARAM_ORDER: Record<string, string[]> = {
   'preset-models': ['provider'],
   'preset-model-info': ['provider', 'model'],
-  'apply-model-config': ['route', 'entry', 'overwrite'],
+  'apply-model-config': ['route', 'entry', 'overwrite', 'clearFields'],
   'delete-model': ['route', 'modelId'],
 }
 

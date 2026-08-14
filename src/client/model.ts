@@ -49,7 +49,7 @@ export function entryToForm(entry: any): any {
   const compat = entry.compat && typeof entry.compat === 'object' && !Array.isArray(entry.compat) ? entry.compat : {}
   return {
     id: typeof entry.id === 'string' ? entry.id : '',
-    name: (typeof entry.name === 'string' ? entry.name : '') || (typeof entry.id === 'string' ? entry.id : ''),
+    name: typeof entry.name === 'string' ? entry.name : '',
     contextWindow: entry.contextWindow ? String(entry.contextWindow) : '',
     maxTokens: entry.maxTokens ? String(entry.maxTokens) : '',
     inputText: !input.length || input.indexOf('text') >= 0,
