@@ -49,3 +49,7 @@ dsh plugin --profile web add ./dsh-provider-model-configurator-0.3.2.tgz
 ## License
 
 MIT
+
+## 鸣谢
+
+[LINUX DO](https://linux.do/)
