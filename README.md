@@ -12,14 +12,14 @@
 
 ```sh
 # 从 GitHub 安装
-dsh plugin --profile web add github:LiangYin233/dsh-provider-model-configurator#v0.3.3
+dsh plugin --profile web add github:LiangYin233/dsh-provider-model-configurator#v0.3.4
 
 # 或从 GitHub tarball 安装
-dsh plugin --profile web add https://github.com/LiangYin233/dsh-provider-model-configurator/archive/refs/tags/v0.3.3.tar.gz
+dsh plugin --profile web add https://github.com/LiangYin233/dsh-provider-model-configurator/archive/refs/tags/v0.3.4.tar.gz
 
 # 或从本地打包安装
 npm pack
-dsh plugin --profile web add ./dsh-provider-model-configurator-0.3.3.tgz
+dsh plugin --profile web add ./dsh-provider-model-configurator-0.3.4.tgz
 ```
 
 安装后**重启 Web 服务器并刷新页面**,打开设置 → 左侧导航「模型 Pro」(Models 页之后)。
