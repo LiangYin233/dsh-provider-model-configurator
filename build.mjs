@@ -32,6 +32,8 @@ if (dynamic) {
     ...common,
     entryPoints: ['src/client/dynamic.ts'],
     outfile: 'dist/_dynamic-client.cjs',
+    // Keep generated lines short so the body stays readable in cordis_define.
+    lineLimit: 100,
   })
   const cjs = await readFile('dist/_dynamic-client.cjs', 'utf8')
   await mkdir('dist', { recursive: true })
