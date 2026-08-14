@@ -1,9 +1,9 @@
 /**
  * Static bundle entry → built into lib/client.js (ModuleLoader format).
  * Talks to the host through the Typert Remote handle (descriptors imported
- * from the shared wire contract); CSS via a fixed-id style tag.
+ * from the shared wire contract in src/host/); CSS via a fixed-id style tag.
  */
-import { INVOCATIONS } from '../lib/contract.js'
+import { INVOCATIONS } from '../host/contract.js'
 import { ModelConfiguratorPage, zh, en, css, type Translate, type Call } from './page.js'
 
 export const name = 'dsh-provider-model-configurator'

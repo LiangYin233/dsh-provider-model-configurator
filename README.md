@@ -62,40 +62,45 @@ dsh plugin --profile web add ./dsh-provider-model-configurator-0.3.1.tgz
 ├── package.json        bundle 清单:dsh.bundle.patch / dsh.client / exports
 ├── cordis.patch.yml    bundle patch:插入 dsh-provider-model-configurator 条目
 ├── dsh.plugin.json     插件元数据(id/main/engines)
-├── lib/
-│   ├── index.js        Host 半区:modelConfigurator Typert Remote 服务(6 个方法)
-│   ├── contract.js     线契约:Invocation descriptors + Host Typert manifest
-│   └── client.js       构建产物:Client 半区(ModuleLoader bundle,由 src/ 生成)
+├── lib/                构建产物(由 build.mjs 生成,发布时随包携带)
+│   ├── index.js        ← src/host/index.js(静态 Host:modelConfigurator Remote)
+│   ├── contract.js     ← src/host/contract.js(线契约)
+│   └── client.js       ← src/client/static.tsx(ModuleLoader bundle)
 ├── src/
-│   ├── page.tsx        设置页 UI 单一源码(TSX/JSX,表单与构建逻辑)
-│   ├── page.css        页面样式(独立 CSS 文件)
-│   ├── locales/
-│   │   ├── zh.json     简体中文词典(一个语言一个 JSON)
-│   │   └── en.json     English dictionary
-│   ├── static.tsx      静态 bundle 入口(remote 适配、样式注入)
-│   ├── dynamic.ts      动态插件入口(host.call 适配、styles.insert)
-│   ├── host.dyn.js     动态插件 Host 半区
-│   ├── env.d.ts        运行环境符号声明(React / styles / host)
-│   └── css.d.ts        *.css 文本导入声明
-├── build.mjs           esbuild 构建:lib/client.js 与动态插件 code.client 函数体
+│   ├── host/           Host 半区源码
+│   │   ├── index.js    静态 Host:TypertRemoteService + manifest 注册(6 个方法)
+│   │   ├── contract.js 线契约:Invocation descriptors + Host Typert manifest
+│   │   └── dynamic.js  动态插件 Host 半区(cordis_define 的 code.host)
+│   └── client/         Client 半区源码
+│       ├── page.tsx    设置页组件(仅 UI 与表单状态)
+│       ├── model.ts    模型条目业务逻辑(buildEntry / entryToForm / modelSummary)
+│       ├── page.css    页面样式(独立 CSS 文件)
+│       ├── locales/
+│       │   ├── zh.json 简体中文词典(一个语言一个 JSON)
+│       │   └── en.json English dictionary
+│       ├── static.tsx  静态 bundle 入口(remote 适配、样式注入)
+│       ├── dynamic.ts  动态插件入口(host.call 适配、styles.insert)
+│       ├── env.d.ts    运行环境符号声明(React / styles / host)
+│       └── css.d.ts    *.css 文本导入声明
+├── build.mjs           esbuild 构建:lib/ 产物与动态插件 code.client 函数体
 ├── tsconfig.json
 └── README.md
 ```
 
 ## 开发与构建
 
-页面以 TSX 记录在 `src/page.tsx`(不写 `React.createElement`),构建生成两个客户端产物:
+页面以 TSX 记录在 `src/client/page.tsx`(不写 `React.createElement`),业务逻辑在 `src/client/model.ts`,词典在 `src/client/locales/`,Host 半区在 `src/host/`。构建生成两套产物:
 
 ```sh
 npm install
-npm run build           # → lib/client.js(+ sourcemap),静态 bundle 的 Client 半区
+npm run build           # → lib/client.js(+ sourcemap)+ 回填 lib/index.js、lib/contract.js
 npm run build:dynamic   # → dist/dynamic-client-body.js,动态插件的 code.client 函数体
 npm run typecheck       # tsc --noEmit
 ```
 
-- `src/static.tsx` 通过 Typert Remote 与宿主通信,是安装包(bundle)使用的 Client;
-- `src/dynamic.ts` 通过 `host.call` 与宿主通信,与 `src/host.dyn.js` 组成动态插件版本(cordis_define 用);
-- 两个入口共享 `src/page.tsx`,页面与环境的差异只存在于薄适配层。
+- `src/client/static.tsx` 通过 Typert Remote 与宿主通信,是安装包(bundle)使用的 Client;
+- `src/client/dynamic.ts` 通过 `host.call` 与宿主通信,与 `src/host/dynamic.js` 组成动态插件版本(cordis_define 用);
+- 两个入口共享 `src/client/page.tsx`,页面与环境的差异只存在于薄适配层。
 
 ## 架构
 

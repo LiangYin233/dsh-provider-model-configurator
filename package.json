@@ -36,7 +36,7 @@
     "build": "node build.mjs",
     "build:dynamic": "node build.mjs --dynamic",
     "typecheck": "tsc --noEmit",
-    "check": "npm run typecheck && npm run build && node --check lib/contract.js && node --check lib/index.js"
+    "check": "npm run typecheck && npm run build && node --check src/host/contract.js && node --check src/host/index.js"
   },
   "devDependencies": {
     "@types/react": "^18.3.0",

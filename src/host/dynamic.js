@@ -1,7 +1,7 @@
 /**
  * 供应商模型配置器 — 动态插件 Host 半区源码(即 cordis_define 的 `code.host`)。
  *
- * 与 `src/dynamic.ts` 构建出的 `code.client`(dist/dynamic-client-body.js)
+ * 与 `src/client/dynamic.ts` 构建出的 `code.client`(dist/dynamic-client-body.js)
  * 组成动态插件版本:在 DSH 会话中 cordis_define 时,本文件内容(不含本注释块)
  * 原样粘贴为 `code.host`,生成体粘贴为 `code.client`,然后 cordis_run 激活
  * (Client 端首次需要用户批准)。

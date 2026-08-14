@@ -2,7 +2,7 @@
  * Dynamic plugin entry → dist/dynamic-client-body.js (code.client body).
  * Free symbols are the dynamic runner's closure parameters: React, styles,
  * host, ctx. `-dyn` namespace/slot keep this debug copy coexisting with the
- * static bundle's page in the same GUI; src/host.dyn.js is the host half.
+ * static bundle's page in the same GUI; src/host/dynamic.js is the host half.
  */
 import { ModelConfiguratorPage, zh, en, css, type Translate, type Call } from './page.js'
 

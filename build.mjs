@@ -1,14 +1,17 @@
 /**
- * Build the client artifacts from the TSX page source.
+ * Build the client artifacts from the TSX page source and refresh the host
+ * artifacts in lib/ from their sources in src/host/.
  *
  *   node build.mjs            → lib/client.js (ModuleLoader bundle + map),
- *                               the static bundle client shipped by the package
+ *                               the static bundle client shipped by the package;
+ *                               lib/index.js + lib/contract.js re-copied from
+ *                               src/host/ (the shipped host half)
  *   node build.mjs --dynamic  → dist/dynamic-client-body.js, a plain JS
  *                               function body for cordis_define `code.client`
  *                               (free symbols: React, styles, host, ctx)
  */
 import { build } from 'esbuild'
-import { mkdir, readFile, rm, writeFile } from 'node:fs/promises'
+import { copyFile, mkdir, readFile, rm, writeFile } from 'node:fs/promises'
 
 const PACKAGE = 'dsh-provider-model-configurator'
 const dynamic = process.argv.includes('--dynamic')
@@ -27,7 +30,7 @@ const common = {
 if (dynamic) {
   await build({
     ...common,
-    entryPoints: ['src/dynamic.ts'],
+    entryPoints: ['src/client/dynamic.ts'],
     outfile: 'dist/_dynamic-client.cjs',
   })
   const cjs = await readFile('dist/_dynamic-client.cjs', 'utf8')
@@ -41,7 +44,7 @@ if (dynamic) {
 } else {
   await build({
     ...common,
-    entryPoints: ['src/static.tsx'],
+    entryPoints: ['src/client/static.tsx'],
     outfile: 'lib/client.js',
     external: ['react'],
     sourcemap: true,
@@ -50,3 +53,8 @@ if (dynamic) {
   })
   console.log('static client bundle → lib/client.js (+ client.js.map)')
 }
+
+// Refresh the shipped host half from its sources (plain ESM, copied verbatim).
+await copyFile('src/host/index.js', 'lib/index.js')
+await copyFile('src/host/contract.js', 'lib/contract.js')
+console.log('host sources → lib/index.js + lib/contract.js')
