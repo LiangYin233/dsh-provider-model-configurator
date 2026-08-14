@@ -1,7 +1,7 @@
 {
   "name": "dsh-model-config-sync",
   "description": "Apply a preset (installed catalog) model's context window, max output and reasoning efforts to any configured custom provider, straight from a dedicated settings page — no catalog update needed.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "license": "MIT",
   "type": "module",
   "main": "lib/index.js",

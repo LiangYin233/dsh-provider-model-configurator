@@ -25,7 +25,7 @@ dsh plugin --profile web add https://github.com/LiangYin233/dsh-model-config-syn
 # 或从本地打包安装(开发时;git/registry 安装会把包物化为 profile 内的真实目录,
 # 而 pnpm 对 `add <目录>` 使用符号链接,宿主端 ESM 依赖解析会失效,请走 tarball)
 npm pack
-dsh plugin --profile web add ./dsh-model-config-sync-0.1.0.tgz
+dsh plugin --profile web add ./dsh-model-config-sync-0.1.1.tgz
 ```
 
 然后**重启** Web 服务器并刷新页面:
@@ -50,6 +50,7 @@ dsh plugin --profile web add ./dsh-model-config-sync-0.1.0.tgz
 - 目标:任意**已配置**的 `llm-pi-ai` 路由(含自定义提供商与内置目录路由);
 - 内置目录路由应用后自动转为**显式 models 列表,保留全部目录模型**,`modelOverrides` 折叠进对应条目,不丢失;
 - 同名模型需勾选「覆盖」;写入经 settings 校验器,立即生效,官方 Models 页自动刷新;
+- **编辑已有模型**:在目标提供商下输入/选择已配置的模型 ID 时,自动载入其**当前配置**(显示名、上下文、输出上限、输入模态、推理档位),修改后重新应用;表单未涉及的字段(description 等)原样保留,不会被覆盖;
 - 只写 settings 文档,不接触、不存储任何 API 密钥。
 
 ## 仓库结构
