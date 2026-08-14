@@ -250,10 +250,17 @@ export function ModelConfiguratorPage(props: PageProps) {
     if (!form.maxTokens.trim()) clearFields.push('maxTokens')
     if (form.inputUnset || (!form.inputText && !form.inputImage)) clearFields.push('input')
     if (form.reasoningMode === 'unset') clearFields.push('reasoningEfforts')
+    // Compat unset semantics: clearing BOTH switches removes the whole compat
+    // block from the previous entry; clearing only ONE drops that field's old
+    // value (built.compat replaces the previous block wholesale on the host)
+    // rather than inheriting it — "unset" always means "remove", never "keep".
     if (form.compatThinkingFormat === '' && form.compatSupportsReasoningEffort === '') clearFields.push('compat')
     setBusy(true)
     setStatus(null)
     try {
+      // overwrite is always true here: the overwrite confirmation already ran
+      // above (exists check); the host's overwrite=false guard only protects
+      // direct API callers, the bundle always goes through the confirm dialog.
       const r = await call('apply-model-config', { route: targetRoute, entry, overwrite: true, clearFields })
       if (!r || r.ok !== true) { setStatus({ kind: 'err', text: (r && r.error) || '应用失败' }); return }
       setStatus({ kind: 'ok', text: t('statusOk').replace('{model}', r.model).replace('{route}', r.route).replace('{count}', String(r.count)) })
@@ -293,7 +300,7 @@ export function ModelConfiguratorPage(props: PageProps) {
             <span className="mcfg-label">{t('targetModels')}</span>
             <div className="mcfg-idWrap">
               <input className="mcfg-input mcfg-idInput" value={form.id} placeholder="deepseek-v5" onChange={(e) => onIdChange(e.target.value)} />
-              <button type="button" className="mcfg-btn mcfg-shrink" onClick={() => setSourceOpen(true)}>{t('usePreset')}</button>
+              <button type="button" className="mcfg-btn mcfg-shrink" disabled={boot.writable === false} onClick={() => setSourceOpen(true)}>{t('usePreset')}</button>
             </div>
             {target.usesCatalog ? <p className="mcfg-note">{t('catalogRouteNote')}</p> : null}
             {target.hasModelOverrides ? <p className="mcfg-note">{t('overridesNote')}</p> : null}
@@ -305,8 +312,8 @@ export function ModelConfiguratorPage(props: PageProps) {
                   <span className="mcfg-label">{m.id}</span>
                   <p className="mcfg-hint">{modelSummary(m)}</p>
                 </div>
-                <button type="button" className="mcfg-btn mcfg-shrink" onClick={() => loadEntry(m)}>{t('editModel')}</button>
-                <button type="button" className="mcfg-btn mcfg-shrink" disabled={deleting} onClick={() => removeModel(m.id)}>{t('deleteModel')}</button>
+                <button type="button" className="mcfg-btn mcfg-shrink" disabled={boot.writable === false} onClick={() => loadEntry(m)}>{t('editModel')}</button>
+                <button type="button" className="mcfg-btn mcfg-shrink" disabled={deleting || boot.writable === false} onClick={() => removeModel(m.id)}>{t('deleteModel')}</button>
               </div>
             )) : (target.usesCatalog && target.catalogModels.length
               ? <p className="mcfg-hint">{t('catalogModelsHint') + ' ' + target.catalogModels.join(', ')}</p>

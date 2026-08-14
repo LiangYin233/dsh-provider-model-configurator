@@ -91,6 +91,9 @@ return {
           if (hit.name) name = hit.name
           if (hit.contextWindow) contextWindow = hit.contextWindow
           if (hit.maxTokens) maxTokens = hit.maxTokens
+          // Keep the catalog path in sync with preset-models: input modalities
+          // are advertised by the catalog too, not only by the resolve path.
+          if (hit.inputModalities && hit.inputModalities.length) input = [...hit.inputModalities]
         }
       } catch (e) { /* catalog knowledge unavailable; resolve path may still answer */ }
       if (live.has(provider)) {
@@ -182,12 +185,14 @@ return {
     harness.handle('apply-model-config', async (args) => {
       const st = getSettings()
       if (st === undefined) return { ok: false, error: 'settings 服务不可用' }
+      let writable = true
+      try { writable = st.writable !== false } catch (e) { /* default true */ }
+      if (!writable) return { ok: false, error: '设置只读,无法写入模型配置' }
       const route = String((args && args.route) || '')
       const entry = args && args.entry && typeof args.entry === 'object' ? args.entry : null
       if (!route) return { ok: false, error: '缺少目标提供商路由名' }
       if (!entry || typeof entry.id !== 'string' || !entry.id.trim()) return { ok: false, error: '缺少模型 ID' }
       const id = entry.id.trim()
-      if (!/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(id)) return { ok: false, error: '模型 ID 只能包含字母、数字、点、下划线与连字符' }
       const clears = Array.isArray(args.clearFields) ? args.clearFields.filter((k) => typeof k === 'string') : []
       let providers = {}
       try {
@@ -309,6 +314,9 @@ return {
     harness.handle('delete-model', async (args) => {
       const st = getSettings()
       if (st === undefined) return { ok: false, error: 'settings 服务不可用' }
+      let writable = true
+      try { writable = st.writable !== false } catch (e) { /* default true */ }
+      if (!writable) return { ok: false, error: '设置只读,无法写入模型配置' }
       const route = String((args && args.route) || '')
       const modelId = String((args && args.modelId) || '')
       if (!route) return { ok: false, error: '缺少目标提供商路由名' }

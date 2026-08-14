@@ -31,6 +31,8 @@ dsh plugin --profile web add ./dsh-provider-model-configurator-0.3.7.tgz
 - **复制填充**:「使用模型预设」打开来源选择器,从预设目录或其他提供商挑一个模型快速填充表单;
 - **兼容开关 (compat)**:编辑 `thinkingFormat`(openai / deepseek / openrouter / together / zai / qwen / string-thinking / ant-ling)与 `supportsReasoningEffort`(true / false / 未设置),供 openai-completions 推理分发读取;
 
+> **目录快照行为**:在尚未显式配置模型列表的目录提供商上新建/应用模型时,插件会把内置目录的当前模型列表整体写入为该提供商的显式条目(目录中已有的 ID 原地更新,新 ID 追加),之后再编辑均基于这份显式列表;目录后续更新不会自动合并进已快照的列表。目录提供商若删到零个显式条目,则回退为内置目录(未快照)状态。
+
 ## 仓库结构
 
 ```
