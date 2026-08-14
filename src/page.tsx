@@ -1,32 +1,14 @@
 /**
- * Provider Model Configurator — shared settings page (TSX source).
- *
- * This file is the single source of the settings page UI, dictionaries and
- * helpers. It is environment-neutral: everything reaches the page through
- * two props — `t` (locale translate) and `call` (one host RPC, returning the
- * business envelope `{ ok: true, ... } | { ok: false, error }`).
- *
- * Two thin entries consume it:
- *   - `src/static.tsx`   → built into `lib/client.js` (ModuleLoader bundle)
- *   - `src/dynamic.ts`   → built into the dynamic plugin's `code.client` body
- *
- * Build: `node build.mjs` (see package.json scripts).
+ * Provider Model Configurator — shared settings page (single TSX source).
+ * Environment-neutral: driven only by `t` (translate) and `call` (one host
+ * RPC returning `{ ok, ... } | { ok: false, error }`).
+ * Entries: src/static.tsx (bundle) and src/dynamic.ts (dynamic plugin).
  */
 
-export interface Translate {
-  (key: string): string
-}
+export type Translate = (key: string) => string
+export type Call = (method: string, payload?: Record<string, unknown>) => Promise<any>
+export interface PageProps { t: Translate; call: Call }
 
-export interface Call {
-  (method: string, payload?: Record<string, unknown>): Promise<any>
-}
-
-export interface PageProps {
-  t: Translate
-  call: Call
-}
-
-/** Simplified Chinese dictionary (the key-set source of truth). */
 export const zh = {
   nav: '供应商模型配置器',
   title: '供应商模型配置器',
@@ -90,7 +72,6 @@ export const zh = {
   needTarget: '请先选择目标提供商。',
 } as const
 
-/** English dictionary, checked complete against the zh key set. */
 export const en: Record<keyof typeof zh, string> = {
   nav: 'Provider Model Configurator',
   title: 'Provider Model Configurator',
@@ -154,39 +135,39 @@ export const en: Record<keyof typeof zh, string> = {
   needTarget: 'Choose a target provider first.',
 }
 
-/** Page stylesheet, injected by the mounting entry (styles.insert or a style tag). */
-export const css = '.mcfg-page{display:flex;flex-direction:column;gap:16px;max-width:680px;padding:4px 2px 24px}' +
-  '.mcfg-title{color:var(--dsw-alias-label-primary);font-size:16px;font-weight:500;line-height:24px;margin:0}' +
-  '.mcfg-intro{color:var(--dsw-alias-label-secondary);font-size:13px;line-height:20px;margin:0}' +
-  '.mcfg-card{background:var(--dsw-alias-bg-layer-2);border:1px solid var(--dsw-alias-border-l1);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:12px}' +
-  '.mcfg-cardTitle{color:var(--dsw-alias-label-primary);font-size:14px;font-weight:500;line-height:20px;margin:0}' +
-  '.mcfg-field{display:flex;flex-direction:column;gap:6px}' +
-  '.mcfg-label{color:var(--dsw-alias-label-secondary);font-size:12px;line-height:16px}' +
-  '.mcfg-input{box-sizing:border-box;width:100%;height:32px;padding:0 10px;border-radius:8px;border:1px solid var(--dsw-alias-border-l1);background:var(--dsw-alias-bg-base);color:var(--dsw-alias-label-primary);font-family:inherit;font-size:13px}' +
-  '.mcfg-input:focus{outline:none;border-color:var(--dsw-alias-brand-primary)}' +
-  '.mcfg-input:disabled{opacity:.55}' +
-  '.mcfg-selectInput{appearance:auto}' +
-  '.mcfg-shrink{width:auto;flex:none}' +
-  '.mcfg-row{display:flex;flex-direction:row;gap:8px;align-items:center}' +
-  '.mcfg-hint{color:var(--dsw-alias-label-secondary);font-size:12px;line-height:18px;margin:0}' +
-  '.mcfg-note{color:var(--dsw-alias-state-warn-primary);font-size:12px;line-height:18px;margin:0}' +
-  '.mcfg-divider{border-top:1px solid var(--dsw-alias-border-l1);padding-top:12px;margin-top:4px}' +
-  '.mcfg-info{display:flex;flex-direction:column;gap:4px;border-left:2px solid var(--dsw-alias-border-l1);padding-left:10px}' +
-  '.mcfg-infoLine{color:var(--dsw-alias-label-secondary);font-size:12px;line-height:18px;margin:0}' +
-  '.mcfg-btn{box-sizing:border-box;height:32px;padding:0 14px;border-radius:8px;border:1px solid var(--dsw-alias-border-l1);background:var(--dsw-alias-bg-base);color:var(--dsw-alias-label-primary);font-family:inherit;font-size:13px;cursor:pointer}' +
-  '.mcfg-btn:hover{background:var(--dsw-alias-interactive-bg-hover,var(--dsw-alias-bg-layer-1))}' +
-  '.mcfg-btnPrimary{box-sizing:border-box;height:32px;padding:0 16px;border-radius:8px;border:none;background:var(--dsw-alias-brand-primary);color:#fff;font-family:inherit;font-size:13px;font-weight:500;cursor:pointer}' +
-  '.mcfg-btnPrimary:disabled{opacity:.5;cursor:default}' +
-  '.mcfg-check{display:flex;flex-direction:row;gap:8px;align-items:center;color:var(--dsw-alias-label-primary);font-size:13px;cursor:pointer}' +
-  '.mcfg-statusOk{color:var(--dsw-alias-state-success-primary);font-size:13px;line-height:20px;margin:0}' +
-  '.mcfg-statusErr{color:var(--dsw-alias-state-error-primary);font-size:13px;line-height:20px;margin:0}' +
-  '.mcfg-code{background:var(--dsw-alias-bg-base);border:1px solid var(--dsw-alias-border-l1);border-radius:8px;padding:10px;font-family:ui-monospace,Consolas,monospace;font-size:12px;line-height:18px;white-space:pre-wrap;word-break:break-all;color:var(--dsw-alias-label-secondary);max-height:260px;overflow:auto;margin:0}'
+export const css = [
+  '.mcfg-page{display:flex;flex-direction:column;gap:16px;max-width:680px;padding:4px 2px 24px}',
+  '.mcfg-title{color:var(--dsw-alias-label-primary);font-size:16px;font-weight:500;line-height:24px;margin:0}',
+  '.mcfg-intro{color:var(--dsw-alias-label-secondary);font-size:13px;line-height:20px;margin:0}',
+  '.mcfg-card{background:var(--dsw-alias-bg-layer-2);border:1px solid var(--dsw-alias-border-l1);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:12px}',
+  '.mcfg-cardTitle{color:var(--dsw-alias-label-primary);font-size:14px;font-weight:500;line-height:20px;margin:0}',
+  '.mcfg-field{display:flex;flex-direction:column;gap:6px}',
+  '.mcfg-label{color:var(--dsw-alias-label-secondary);font-size:12px;line-height:16px}',
+  '.mcfg-input{box-sizing:border-box;width:100%;height:32px;padding:0 10px;border-radius:8px;border:1px solid var(--dsw-alias-border-l1);background:var(--dsw-alias-bg-base);color:var(--dsw-alias-label-primary);font-family:inherit;font-size:13px}',
+  '.mcfg-input:focus{outline:none;border-color:var(--dsw-alias-brand-primary)}',
+  '.mcfg-input:disabled{opacity:.55}',
+  '.mcfg-selectInput{appearance:auto}',
+  '.mcfg-shrink{width:auto;flex:none}',
+  '.mcfg-row{display:flex;flex-direction:row;gap:8px;align-items:center}',
+  '.mcfg-hint{color:var(--dsw-alias-label-secondary);font-size:12px;line-height:18px;margin:0}',
+  '.mcfg-note{color:var(--dsw-alias-state-warn-primary);font-size:12px;line-height:18px;margin:0}',
+  '.mcfg-divider{border-top:1px solid var(--dsw-alias-border-l1);padding-top:12px;margin-top:4px}',
+  '.mcfg-info{display:flex;flex-direction:column;gap:4px;border-left:2px solid var(--dsw-alias-border-l1);padding-left:10px}',
+  '.mcfg-infoLine{color:var(--dsw-alias-label-secondary);font-size:12px;line-height:18px;margin:0}',
+  '.mcfg-btn{box-sizing:border-box;height:32px;padding:0 14px;border-radius:8px;border:1px solid var(--dsw-alias-border-l1);background:var(--dsw-alias-bg-base);color:var(--dsw-alias-label-primary);font-family:inherit;font-size:13px;cursor:pointer}',
+  '.mcfg-btn:hover{background:var(--dsw-alias-interactive-bg-hover,var(--dsw-alias-bg-layer-1))}',
+  '.mcfg-btnPrimary{box-sizing:border-box;height:32px;padding:0 16px;border-radius:8px;border:none;background:var(--dsw-alias-brand-primary);color:#fff;font-family:inherit;font-size:13px;font-weight:500;cursor:pointer}',
+  '.mcfg-btnPrimary:disabled{opacity:.5;cursor:default}',
+  '.mcfg-check{display:flex;flex-direction:row;gap:8px;align-items:center;color:var(--dsw-alias-label-primary);font-size:13px;cursor:pointer}',
+  '.mcfg-statusOk{color:var(--dsw-alias-state-success-primary);font-size:13px;line-height:20px;margin:0}',
+  '.mcfg-statusErr{color:var(--dsw-alias-state-error-primary);font-size:13px;line-height:20px;margin:0}',
+  '.mcfg-code{background:var(--dsw-alias-bg-base);border:1px solid var(--dsw-alias-border-l1);border-radius:8px;padding:10px;font-family:ui-monospace,Consolas,monospace;font-size:12px;line-height:18px;white-space:pre-wrap;word-break:break-all;color:var(--dsw-alias-label-secondary);max-height:260px;overflow:auto;margin:0}',
+].join('')
 
-/** Model id charset shared with the host write path. */
-export const THINKING_LEVELS = ['off', 'minimal', 'low', 'medium', 'high', 'xhigh', 'max']
+const THINKING_LEVELS = ['off', 'minimal', 'low', 'medium', 'high', 'xhigh', 'max']
+type Status = { kind: 'ok' | 'err'; text: string }
 
-/** Build the wire entry from the form state (mirrors the host build rules). */
-export function buildEntry(form: any): any {
+function buildEntry(form: any): any {
   const e: any = { id: form.id.trim() }
   if (form.name && form.name.trim()) e.name = form.name.trim()
   const cw = Number(form.contextWindow)
@@ -213,38 +194,29 @@ export function buildEntry(form: any): any {
 }
 
 /** Convert one existing model entry back into editable form state. */
-export function entryToForm(entry: any): any {
-  let reasoningMode = 'off'
-  let levels: any[] = []
-  if (entry.reasoningEfforts && typeof entry.reasoningEfforts === 'object' && !Array.isArray(entry.reasoningEfforts)) {
-    const keys = Object.keys(entry.reasoningEfforts)
-    if (keys.length) {
-      reasoningMode = 'levels'
-      levels = keys.map((level: string) => {
-        const wire = entry.reasoningEfforts[level]
-        return {
-          level,
-          wire: level === 'off' ? '' : (typeof wire === 'string' ? wire : ''),
-          on: true,
-        }
-      })
-    }
-  }
+function entryToForm(entry: any): any {
   const input = Array.isArray(entry.input) ? entry.input : []
+  const keys = entry.reasoningEfforts && typeof entry.reasoningEfforts === 'object' && !Array.isArray(entry.reasoningEfforts)
+    ? Object.keys(entry.reasoningEfforts)
+    : []
   return {
-    id: (typeof entry.id === 'string' ? entry.id : ''),
+    id: typeof entry.id === 'string' ? entry.id : '',
     name: (typeof entry.name === 'string' ? entry.name : '') || (typeof entry.id === 'string' ? entry.id : ''),
     contextWindow: entry.contextWindow ? String(entry.contextWindow) : '',
     maxTokens: entry.maxTokens ? String(entry.maxTokens) : '',
     inputText: !input.length || input.indexOf('text') >= 0,
     inputImage: input.indexOf('image') >= 0,
-    reasoningMode,
-    levels,
+    reasoningMode: keys.length ? 'levels' : 'off',
+    levels: keys.map((level: string) => ({
+      level,
+      wire: level === 'off' ? '' : (typeof entry.reasoningEfforts[level] === 'string' ? entry.reasoningEfforts[level] : ''),
+      on: true,
+    })),
   }
 }
 
 /** One-line summary of an existing model entry for the provider model list. */
-export function modelSummary(entry: any): string {
+function modelSummary(entry: any): string {
   const parts: string[] = []
   if (typeof entry.name === 'string' && entry.name && entry.name !== entry.id) parts.push(entry.name)
   if (entry.contextWindow) parts.push('ctx ' + entry.contextWindow)
@@ -257,10 +229,9 @@ export function modelSummary(entry: any): string {
   return parts.length ? parts.join(' · ') : '—'
 }
 
-/** The settings page: provider model management + the model configuration editor. */
 export function ModelConfiguratorPage(props: PageProps) {
   const { t, call } = props
-  const [boot, setBoot] = React.useState<{ providers: any[]; targets: any[]; writable: boolean; error: string }>({ providers: [], targets: [], writable: true, error: '' })
+  const [boot, setBoot] = React.useState({ providers: [] as any[], targets: [] as any[], writable: true, error: '' })
   const [sourceProvider, setSourceProvider] = React.useState('')
   const [sourceModels, setSourceModels] = React.useState<any[]>([])
   const [sourceModel, setSourceModel] = React.useState('')
@@ -272,16 +243,21 @@ export function ModelConfiguratorPage(props: PageProps) {
   const [loadedEntryId, setLoadedEntryId] = React.useState('')
   const [deleting, setDeleting] = React.useState(false)
   const [busy, setBusy] = React.useState(false)
-  const [status, setStatus] = React.useState<{ kind: 'ok' | 'err'; text: string } | null>(null)
+  const [status, setStatus] = React.useState<Status | null>(null)
   const [showPreview, setShowPreview] = React.useState(false)
+
+  const fail = (err: unknown) => setStatus({ kind: 'err', text: (err as Error)?.message || String(err) })
+  const refresh = async () => {
+    const b = await call('target-providers')
+    if (b && b.ok === true) setBoot((x) => ({ ...x, targets: b.providers }))
+  }
 
   React.useEffect(() => {
     let alive = true
-    Promise.all([call('preset-providers'), call('target-providers')])
-      .then((results) => {
+    ;(async () => {
+      try {
+        const [a, b] = await Promise.all([call('preset-providers'), call('target-providers')])
         if (!alive) return
-        const a = results[0] || {}
-        const b = results[1] || {}
         const errs: string[] = []
         if (a.ok !== true) errs.push(a.error || 'preset-providers failed')
         if (b.ok !== true) errs.push(b.error || 'target-providers failed')
@@ -291,14 +267,24 @@ export function ModelConfiguratorPage(props: PageProps) {
           writable: b.ok === true ? b.writable !== false : true,
           error: errs.join('; '),
         })
-      })
-      .catch((err: any) => { if (alive) setBoot((x) => ({ ...x, error: String((err && err.message) || err) })) })
+      } catch (err) {
+        if (alive) setBoot((x) => ({ ...x, error: (err as Error)?.message || String(err) }))
+      }
+    })()
     return () => { alive = false }
   }, [])
 
   const target = boot.targets.find((x) => x.provider === targetRoute) || null
   const targetModelIds = target ? [...new Set([...(target.models || []), ...(target.catalogModels || [])])] : []
   const exists = targetModelIds.indexOf(form.id.trim()) >= 0
+
+  const set = (patch: Record<string, unknown>) => setForm((f) => ({ ...f, ...patch }))
+  const setLevel = (index: number, patch: Record<string, unknown>) => setForm((f) => ({
+    ...f,
+    levels: f.levels.map((row, i) => (i === index ? { ...row, ...patch } : row)),
+  }))
+  const removeLevel = (index: number) => setForm((f) => ({ ...f, levels: f.levels.filter((_, i) => i !== index) }))
+  const addLevel = () => setForm((f) => ({ ...f, levels: [...f.levels, { level: 'low', wire: '', on: true }] }))
 
   const loadEntry = (entry: any) => {
     setForm(entryToForm(entry))
@@ -313,30 +299,20 @@ export function ModelConfiguratorPage(props: PageProps) {
     setOverwrite(false)
     if (!target || !id) { setLoadedEntryId(''); return }
     const found = (target.entries || []).find((e: any) => e && e.id === id) || null
-    if (found && found.id !== loadedEntryId) {
-      loadEntry(found)
-    } else if (!found && loadedEntryId === id) {
-      setLoadedEntryId('')
-    }
+    if (found && found.id !== loadedEntryId) loadEntry(found)
+    else if (!found && loadedEntryId === id) setLoadedEntryId('')
   }
 
-  const removeModel = (modelId: string) => {
-    if (deleting) return
-    if (!window.confirm(t('deleteConfirm').replace('{model}', modelId))) return
+  const removeModel = async (modelId: string) => {
+    if (deleting || !window.confirm(t('deleteConfirm').replace('{model}', modelId))) return
     setDeleting(true)
     setStatus(null)
-    call('delete-model', { route: targetRoute, modelId })
-      .then((r) => {
-        if (!r || r.ok !== true) { setStatus({ kind: 'err', text: (r && r.error) || '删除失败' }); return }
-        if (r.revertedToCatalog === true) {
-          setStatus({ kind: 'ok', text: t('statusDeletedCatalog').replace('{model}', r.model).replace('{route}', r.route) })
-        } else {
-          setStatus({ kind: 'ok', text: t('statusDeleted').replace('{model}', r.model).replace('{route}', r.route).replace('{count}', String(r.count)) })
-        }
-        call('target-providers').then((b) => { if (b && b.ok === true) setBoot((x) => ({ ...x, targets: b.providers })) }).catch(() => {})
-      })
-      .catch((err: any) => setStatus({ kind: 'err', text: String((err && err.message) || err) }))
-      .finally(() => setDeleting(false))
+    try {
+      const r = await call('delete-model', { route: targetRoute, modelId })
+      if (!r || r.ok !== true) { setStatus({ kind: 'err', text: (r && r.error) || '删除失败' }); return }
+      setStatus({ kind: 'ok', text: (r.revertedToCatalog === true ? t('statusDeletedCatalog') : t('statusDeleted')).replace('{model}', r.model).replace('{route}', r.route).replace('{count}', String(r.count)) })
+      await refresh()
+    } catch (err) { fail(err) } finally { setDeleting(false) }
   }
 
   const clearSource = () => {
@@ -347,7 +323,7 @@ export function ModelConfiguratorPage(props: PageProps) {
     setStatus(null)
   }
 
-  const onSourceProvider = (value: string) => {
+  const onSourceProvider = async (value: string) => {
     setSourceProvider(value)
     setSourceModel('')
     setPresetInfo(null)
@@ -355,46 +331,42 @@ export function ModelConfiguratorPage(props: PageProps) {
     setStatus(null)
     if (!value) return
     setBusyModel(true)
-    call('preset-models', { provider: value })
-      .then((r) => {
-        if (!r || r.ok !== true) { setStatus({ kind: 'err', text: (r && r.error) || '读取来源模型失败' }); return }
-        setSourceModels(r.models)
-      })
-      .catch((err: any) => setStatus({ kind: 'err', text: String((err && err.message) || err) }))
-      .finally(() => setBusyModel(false))
+    try {
+      const r = await call('preset-models', { provider: value })
+      if (!r || r.ok !== true) { setStatus({ kind: 'err', text: (r && r.error) || '读取来源模型失败' }); return }
+      setSourceModels(r.models)
+    } catch (err) { fail(err) } finally { setBusyModel(false) }
   }
 
-  const onPresetModel = (model: string) => {
+  const onPresetModel = async (model: string) => {
     setSourceModel(model)
     setStatus(null)
     if (!model) { setPresetInfo(null); return }
     setBusyModel(true)
-    call('preset-model-info', { provider: sourceProvider, model })
-      .then((r) => {
-        if (!r || r.ok !== true) { setStatus({ kind: 'err', text: (r && r.error) || '读取来源模型信息失败' }); return }
-        const info = r.info
-        setPresetInfo(info)
-        const levels = (info.reasoning && info.reasoning.efforts && info.reasoning.efforts.length)
-          ? info.reasoning.efforts.map((e: any) => ({ level: e.level, wire: e.level === 'off' ? '' : e.level, on: true }))
-          : []
-        setForm({
-          id: model,
-          name: info.name || model,
-          contextWindow: info.contextWindow ? String(info.contextWindow) : '',
-          maxTokens: info.maxTokens ? String(info.maxTokens) : '',
-          inputText: !info.input || info.input.indexOf('text') >= 0,
-          inputImage: !!(info.input && info.input.indexOf('image') >= 0),
-          reasoningMode: levels.length ? 'levels' : 'off',
-          levels,
-        })
-        setOverwrite(false)
-        setLoadedEntryId('')
+    try {
+      const r = await call('preset-model-info', { provider: sourceProvider, model })
+      if (!r || r.ok !== true) { setStatus({ kind: 'err', text: (r && r.error) || '读取来源模型信息失败' }); return }
+      const info = r.info
+      setPresetInfo(info)
+      const levels = info.reasoning && info.reasoning.efforts && info.reasoning.efforts.length
+        ? info.reasoning.efforts.map((e: any) => ({ level: e.level, wire: e.level === 'off' ? '' : e.level, on: true }))
+        : []
+      setForm({
+        id: model,
+        name: info.name || model,
+        contextWindow: info.contextWindow ? String(info.contextWindow) : '',
+        maxTokens: info.maxTokens ? String(info.maxTokens) : '',
+        inputText: !info.input || info.input.indexOf('text') >= 0,
+        inputImage: !!(info.input && info.input.indexOf('image') >= 0),
+        reasoningMode: levels.length ? 'levels' : 'off',
+        levels,
       })
-      .catch((err: any) => setStatus({ kind: 'err', text: String((err && err.message) || err) }))
-      .finally(() => setBusyModel(false))
+      setOverwrite(false)
+      setLoadedEntryId('')
+    } catch (err) { fail(err) } finally { setBusyModel(false) }
   }
 
-  const apply = () => {
+  const apply = async () => {
     const id = form.id.trim()
     if (!targetRoute) { setStatus({ kind: 'err', text: t('needTarget') }); return }
     if (!id) { setStatus({ kind: 'err', text: t('entryId') + '?' }); return }
@@ -404,24 +376,14 @@ export function ModelConfiguratorPage(props: PageProps) {
     }
     setBusy(true)
     setStatus(null)
-    call('apply-model-config', { route: targetRoute, entry, overwrite: overwrite === true })
-      .then((r) => {
-        if (!r || r.ok !== true) { setStatus({ kind: 'err', text: (r && r.error) || '应用失败' }); return }
-        setStatus({ kind: 'ok', text: t('statusOk').replace('{model}', r.model).replace('{route}', r.route).replace('{count}', String(r.count)) })
-        setOverwrite(false)
-        call('target-providers').then((b) => { if (b && b.ok === true) setBoot((x) => ({ ...x, targets: b.providers })) }).catch(() => {})
-      })
-      .catch((err: any) => setStatus({ kind: 'err', text: String((err && err.message) || err) }))
-      .finally(() => setBusy(false))
+    try {
+      const r = await call('apply-model-config', { route: targetRoute, entry, overwrite: overwrite === true })
+      if (!r || r.ok !== true) { setStatus({ kind: 'err', text: (r && r.error) || '应用失败' }); return }
+      setStatus({ kind: 'ok', text: t('statusOk').replace('{model}', r.model).replace('{route}', r.route).replace('{count}', String(r.count)) })
+      setOverwrite(false)
+      await refresh()
+    } catch (err) { fail(err) } finally { setBusy(false) }
   }
-
-  const set = (patch: Record<string, unknown>) => setForm((f) => ({ ...f, ...patch }))
-  const setLevel = (index: number, patch: Record<string, unknown>) => setForm((f) => ({
-    ...f,
-    levels: f.levels.map((row, i) => (i === index ? { ...row, ...patch } : row)),
-  }))
-  const removeLevel = (index: number) => setForm((f) => ({ ...f, levels: f.levels.filter((_, i) => i !== index) }))
-  const addLevel = () => setForm((f) => ({ ...f, levels: [...f.levels, { level: 'low', wire: '', on: true }] }))
 
   const previewEntry = targetRoute ? buildEntry(form) : null
 
@@ -447,16 +409,8 @@ export function ModelConfiguratorPage(props: PageProps) {
         {target ? (
           <div className="mcfg-field">
             <span className="mcfg-label">{t('targetModels')}</span>
-            <input
-              className="mcfg-input"
-              list="mcfg-model-ids"
-              value={form.id}
-              placeholder="deepseek-v5"
-              onChange={(e) => onIdChange(e.target.value)}
-            />
-            <datalist id="mcfg-model-ids">
-              {targetModelIds.map((id) => <option key={id} value={id} />)}
-            </datalist>
+            <input className="mcfg-input" list="mcfg-model-ids" value={form.id} placeholder="deepseek-v5" onChange={(e) => onIdChange(e.target.value)} />
+            <datalist id="mcfg-model-ids">{targetModelIds.map((id) => <option key={id} value={id} />)}</datalist>
             {target.usesCatalog ? <p className="mcfg-note">{t('catalogRouteNote')}</p> : null}
             {target.hasModelOverrides ? <p className="mcfg-note">{t('overridesNote')}</p> : null}
           </div>
@@ -493,9 +447,7 @@ export function ModelConfiguratorPage(props: PageProps) {
                   ))}
                 </select>
               </div>
-              {sourceProvider ? (
-                <button type="button" className="mcfg-btn mcfg-shrink" onClick={clearSource}>{t('clearSource')}</button>
-              ) : null}
+              {sourceProvider ? <button type="button" className="mcfg-btn mcfg-shrink" onClick={clearSource}>{t('clearSource')}</button> : null}
             </div>
             {sourceProvider ? (
               <div className="mcfg-field">
@@ -601,9 +553,7 @@ export function ModelConfiguratorPage(props: PageProps) {
         <button type="button" className="mcfg-btn" onClick={() => setShowPreview(!showPreview)}>{t('preview')}</button>
       </div>
       {showPreview && previewEntry ? <pre className="mcfg-code">{JSON.stringify(previewEntry, null, 2)}</pre> : null}
-      {status ? (
-        <p className={status.kind === 'ok' ? 'mcfg-statusOk' : 'mcfg-statusErr'} role="status" aria-live="polite">{status.text}</p>
-      ) : null}
+      {status ? <p className={status.kind === 'ok' ? 'mcfg-statusOk' : 'mcfg-statusErr'} role="status" aria-live="polite">{status.text}</p> : null}
     </div>
   )
 }

@@ -1,34 +1,20 @@
 /**
- * Static bundle entry: the web-shell client half of the package.
- *
- * Built by `node build.mjs` into `lib/client.js` in the ModuleLoader format
- * (`window.__ModuleLoader__.load({ id, factory })`); the Node half of
- * dsh-client-modules serves that file raw under
- * /plugins/dsh-provider-model-configurator/client.js.
- *
- * The page talks to the host through the Typert Remote handle
- * (`ctx.remote.$mount` + `ctx.reflect.get('remote.modelConfigurator')`),
- * with descriptors imported from the shared wire contract (lib/contract.js —
- * the same list the host manifest registers). CSS is injected through a
- * fixed-id style tag (no `styles` symbol exists in this runtime).
+ * Static bundle entry → built into lib/client.js (ModuleLoader format).
+ * Talks to the host through the Typert Remote handle (descriptors imported
+ * from the shared wire contract); CSS via a fixed-id style tag.
  */
 import { INVOCATIONS } from '../lib/contract.js'
 import { ModelConfiguratorPage, zh, en, css, type Translate, type Call } from './page.js'
 
-/** Cordis plugin name (the Loader entry and client bundle id). */
 export const name = 'dsh-provider-model-configurator'
-
-/** Services required before load: slots, the Remote handle and locale. */
 export const inject = ['slots', 'remote', 'locale']
 
-/** Locale namespace and settings.section slot identity (static bundle). */
 const NS = 'settings.provider-model-configurator'
 const SLOT_ID = 'provider-model-configurator'
 const SLOT_ORDER = 11
-
 const STYLE_ID = 'dsh-provider-model-configurator-styles'
 
-/** Wire method name → Remote handle method. */
+/** Wire method name → Remote handle method (names already match). */
 const METHOD_MAP: Record<string, string> = {
   'preset-providers': 'presetProviders',
   'preset-models': 'presetModels',

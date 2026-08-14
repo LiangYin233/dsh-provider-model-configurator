@@ -1,20 +1,11 @@
 /**
- * Dynamic plugin entry: the `code.client` body for cordis_define.
- *
- * Built by `node build.mjs --dynamic` into `dist/dynamic-client-body.js` as a
- * plain JS function body (`return <plugin object>;`) whose free symbols are
- * the dynamic runner's closure parameters: `React`, `styles`, `host` and
- * `ctx` (inside apply). Paste the generated body as `code.client` when
- * defining the dynamic plugin; `src/host.dyn.js` is the matching host half.
- *
- * The page talks to the host through `host.call(method, payload)` and CSS is
- * injected through the dynamic `styles.insert`. The locale namespace and
- * slot id carry a `-dyn` suffix so this debug copy coexists with the static
- * bundle's settings page in the same GUI.
+ * Dynamic plugin entry → dist/dynamic-client-body.js (code.client body).
+ * Free symbols are the dynamic runner's closure parameters: React, styles,
+ * host, ctx. `-dyn` namespace/slot keep this debug copy coexisting with the
+ * static bundle's page in the same GUI; src/host.dyn.js is the host half.
  */
 import { ModelConfiguratorPage, zh, en, css, type Translate, type Call } from './page.js'
 
-/** Locale namespace and settings.section slot identity (dynamic debug copy). */
 const NS = 'settings.provider-model-configurator-dyn'
 const SLOT_ID = 'provider-model-configurator-dyn'
 const SLOT_ORDER = 12
